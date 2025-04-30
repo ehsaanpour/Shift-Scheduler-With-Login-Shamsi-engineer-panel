@@ -10,5 +10,11 @@
     "password_hash": "01bca66930a306e87ba4f24cc5e009d88f269de83a9aee0554e03eef0731bb98",
     "role": "engineer",
     "engineer_name": "\u0628\u0634\u06a9"
+  },
+  {
+    "username": "sharifi",
+    "password_hash": "c37ec56eea5fc44dddcd68aa5d85a6aaa72a224f007c3ccc5c84d72fe90feca0",
+    "role": "engineer",
+    "engineer_name": "\u0634\u0631\u06cc\u0641\u06cc"
   }
 ]

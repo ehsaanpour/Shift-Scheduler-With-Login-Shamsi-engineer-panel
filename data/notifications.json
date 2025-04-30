@@ -19,5 +19,17 @@
     "read_by": [
       "admin"
     ]
+  },
+  {
+    "id": "3aed5146-c99b-4e0a-b037-ccb7ec2a4119",
+    "timestamp": "2025-04-30T13:55:22.086945",
+    "type": "limitations_updated",
+    "engineer_name": "\u0634\u0631\u06cc\u0641\u06cc",
+    "year": 1404,
+    "month": 2,
+    "message": "Engineer '\u0634\u0631\u06cc\u0641\u06cc' updated limitations for \u0627\u0631\u062f\u06cc\u0628\u0647\u0634\u062a 1404.",
+    "read_by": [
+      "admin"
+    ]
   }
 ]

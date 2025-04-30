@@ -722,6 +722,12 @@ document.addEventListener('DOMContentLoaded', function() {
             limitBtn.title = 'Set shift limitations';
             limitBtn.addEventListener('click', () => showLimitationsModal(eng));
             
+            const clearLimitBtn = document.createElement('button');
+            clearLimitBtn.classList.add('btn', 'btn-sm', 'btn-outline-danger', 'me-1');
+            clearLimitBtn.innerHTML = '<i class="fas fa-calendar-times"></i>';
+            clearLimitBtn.title = 'Clear all shift limitations';
+            clearLimitBtn.addEventListener('click', () => clearAllLimitations(eng));
+            
             const shiftLimitsBtn = document.createElement('button');
             shiftLimitsBtn.classList.add('btn', 'btn-sm', 'btn-outline-info', 'me-1');
             shiftLimitsBtn.innerHTML = '<i class="fas fa-sliders-h"></i>';
@@ -735,6 +741,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             actions.appendChild(editBtn);
             actions.appendChild(limitBtn);
+            actions.appendChild(clearLimitBtn);
             actions.appendChild(shiftLimitsBtn);
             actions.appendChild(deleteBtn);
             
@@ -1490,6 +1497,63 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Error saving shift limits:', error);
             alert('Failed to save shift limits. Please try again.');
         });
+    }
+    
+    // New function to clear all limitations for an engineer
+    function clearAllLimitations(engineer) {
+        if (!engineer) return;
+        
+        if (confirm(`Are you sure you want to clear ALL shift limitations for ${engineer.name}? This action cannot be undone.`)) {
+            
+            // Create the payload with cleared limitations
+            const payload = {
+                name: engineer.name,
+                workplaces: engineer.workplaces,
+                limitations: {}, // Clear limitations
+                minShifts: engineer.minShifts || 10, // Preserve min/max shifts
+                maxShifts: engineer.maxShifts || 30
+            };
+
+            console.log(`Clearing limitations for ${engineer.name}. Payload:`, JSON.stringify(payload));
+
+            fetch('/api/engineers', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => { throw new Error(err.message || `Server responded with status: ${response.status}`); });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.status === 'success') {
+                    // Update the engineer object locally (important for immediate UI feedback)
+                    const engineerIndex = engineers.findIndex(eng => eng.name === engineer.name);
+                    if (engineerIndex !== -1) {
+                        engineers[engineerIndex].limitations = {};
+                    }
+                    
+                    // Reload the engineer list visually
+                    updateEngineersList(); 
+                    
+                    // Show success message
+                    showAlert(`All limitations cleared for ${engineer.name}.`, 'success');
+                    
+                    // Optionally, regenerate calendars if limitations affect scheduling display
+                    // generateCalendars(); 
+                } else {
+                    throw new Error(data.message || 'Server returned unsuccessful status');
+                }
+            })
+            .catch(error => {
+                console.error('Error clearing limitations:', error);
+                showAlert(`Failed to clear limitations for ${engineer.name}. Error: ${error.message}`, 'danger');
+            });
+        }
     }
     
     // Make saveLimitations function globally available

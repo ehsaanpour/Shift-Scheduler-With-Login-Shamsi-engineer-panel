@@ -83,7 +83,18 @@
       "Studio Press",
       "Nodal"
     ],
-    "limitations": {},
+    "limitations": {
+      "9": [
+        "shift1",
+        "shift2",
+        "shift3"
+      ],
+      "10": [
+        "shift1",
+        "shift2",
+        "shift3"
+      ]
+    },
     "minShifts": 10,
     "maxShifts": 30
   },
