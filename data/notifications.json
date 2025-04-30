@@ -31,5 +31,29 @@
     "read_by": [
       "admin"
     ]
+  },
+  {
+    "id": "f18f8401-6ad7-4245-86ce-d78ad84ac4f6",
+    "timestamp": "2025-04-30T14:33:41.747405",
+    "type": "limitations_updated",
+    "engineer_name": "\u0628\u0634\u06a9",
+    "year": 1404,
+    "month": 2,
+    "message": "Engineer '\u0628\u0634\u06a9' updated limitations for \u0627\u0631\u062f\u06cc\u0628\u0647\u0634\u062a 1404.",
+    "read_by": [
+      "admin"
+    ]
+  },
+  {
+    "id": "37f77ff4-4a10-450c-b500-74022090d082",
+    "timestamp": "2025-04-30T14:39:51.331844",
+    "type": "limitations_updated",
+    "engineer_name": "\u0628\u0634\u06a9",
+    "year": 1404,
+    "month": 2,
+    "message": "Engineer '\u0628\u0634\u06a9' updated limitations for \u0627\u0631\u062f\u06cc\u0628\u0647\u0634\u062a 1404.",
+    "read_by": [
+      "admin"
+    ]
   }
 ]

@@ -1,18 +1,18 @@
 {% extends "base.html" %}
 
-{% block title %}Engineer Dashboard - {{ engineer.name }}{% endblock %}
+{% block title %}داشبورد مهندس - {{ engineer.name }}{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
+<div class="container mt-4 engineer-dashboard">
     <div class="row mb-3">
         <div class="col-md-8">
-            <h1><i class="fas fa-user-clock me-2"></i>Shift Limitations</h1>
-            <p class="lead">Set your unavailable shifts for {{ engineer.name }}.</p>
+            <h1><i class="fas fa-user-clock me-2"></i>محدودیت‌های شیفت</h1>
+            <p class="lead">شیفت‌های عدم دسترسی خود را برای {{ engineer.name }} تنظیم کنید.</p>
         </div>
         <div class="col-md-4 text-end">
-            <p>Logged in as: <strong>{{ username }}</strong> (Engineer)</p>
+            <p>وارد شده با نام: <strong>{{ username }}</strong> (مهندس)</p>
             <a href="{{ url_for('logout') }}" class="btn btn-sm btn-outline-secondary">
-                <i class="fas fa-sign-out-alt me-1"></i> Logout
+                <i class="fas fa-sign-out-alt me-1"></i> خروج
             </a>
         </div>
     </div>
@@ -23,7 +23,7 @@
             {% for category, message in messages %}
                 <div class="alert alert-{{ category or 'info' }} alert-dismissible fade show" role="alert">
                     {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="بستن"></button>
                 </div>
             {% endfor %}
         {% endif %}
@@ -33,7 +33,7 @@
         <div class="card-header bg-light">
             <div class="row align-items-center">
                 <div class="col-md-6">
-                     <h5 class="mb-0">Select Month and Year</h5>
+                     <h5 class="mb-0">انتخاب ماه و سال</h5>
                 </div>
                 <div class="col-md-6 d-flex justify-content-end">
                      <div class="me-2">
@@ -42,6 +42,7 @@
                             <option value="{{ i }}" {% if i == current_jalali_month %}selected{% endif %}>{{ persian_month_names[i] }}</option>
                             {% endfor %}
                          </select>
+                         <label for="monthSelect" class="visually-hidden">ماه</label>
                      </div>
                      <div>
                          <select id="yearSelect" class="form-select form-select-sm">
@@ -49,24 +50,25 @@
                              <option value="{{ year }}" {% if year == current_jalali_year %}selected{% endif %}>{{ year }}</option>
                              {% endfor %}
                          </select>
+                         <label for="yearSelect" class="visually-hidden">سال</label>
                      </div>
                 </div>
             </div>
         </div>
         <div class="card-body">
-            <p class="text-muted small"><i class="fas fa-info-circle me-1"></i> Check the boxes for the shifts you are <strong>unavailable</strong> to work.</p>
+            <p class="text-muted small"><i class="fas fa-info-circle me-1"></i> خانه‌های مربوط به شیفت‌هایی را که برای کار در دسترس <strong>نیستید</strong> علامت بزنید.</p>
             <div id="limitationsCalendar" class="table-responsive">
                 <!-- Calendar table will be generated here by JS -->
                 <div class="text-center p-5">
                     <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading Calendar...</span>
+                        <span class="visually-hidden">در حال بارگذاری تقویم...</span>
                     </div>
                 </div>
             </div>
         </div>
         <div class="card-footer text-end">
             <button id="btnSaveLimitations" class="btn btn-primary">
-                <i class="fas fa-save me-1"></i> Save Limitations for Selected Month
+                <i class="fas fa-save me-1"></i> ذخیره محدودیت‌ها برای ماه انتخاب شده
             </button>
         </div>
     </div>
@@ -75,16 +77,12 @@
 {% endblock %}
 
 {% block extra_js %}
-<!-- Include jalaali-js library -->
 <script src="https://cdn.jsdelivr.net/npm/jalaali-js/dist/jalaali.min.js"></script>
-<!-- Include custom JS for engineer limitations -->
 <script>
-    // Pass engineer data needed by JS
-    const engineerData = {{ engineer|tojson|safe }};
+    const engineerDataJSON = {{ engineer|tojson|safe }};
     const initialJalaliYear = {{ current_jalali_year }};
     const initialJalaliMonth = {{ current_jalali_month }};
-    const persianMonthNamesJS = {{ persian_month_names|tojson|safe }};
-    // persianDayNamesJS will be defined in engineer_limitations.js
+    const persianMonthNamesJSON = {{ persian_month_names|tojson|safe }};
 </script>
 <script src="{{ url_for('static', filename='js/engineer_limitations.js') }}"></script>
 {% endblock %} 

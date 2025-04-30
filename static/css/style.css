@@ -221,3 +221,108 @@ select.consecutive-days-warning {
         border: 1px solid #000;
     }
 }
+
+/* Engineer Dashboard Specific Styles */
+.engineer-dashboard {
+    /* Change to a warmer gradient */
+    background: linear-gradient(to bottom right, #fff7e6, #ffffff); /* Light Orange/Peach to White */
+    padding-top: 2rem; 
+    padding-bottom: 2rem;
+    border-radius: 15px;
+}
+
+.engineer-dashboard .card {
+    background-color: #ffffff;
+    border: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.engineer-dashboard .card-header {
+    /* Change to a warmer gradient */
+    background: linear-gradient(to right, #ff7e5f, #feb47b); /* Coral/Orange Gradient */
+    color: white;
+    border-bottom: none;
+    font-size: 1.1rem;
+}
+
+.engineer-dashboard h1 {
+    color: #d9534f; /* Bootstrap 'danger' red - or a dark orange */
+}
+
+.engineer-dashboard #limitationsCalendar table thead {
+    background-color: #e9ecef; /* Lighter grey header background */
+    color: #343a40; /* Dark text color for header */
+}
+
+.engineer-dashboard #limitationsCalendar table thead th {
+    border-color: #ced4da; /* Match lighter background */
+    font-weight: 600; /* Slightly bolder header text */
+}
+
+.engineer-dashboard #limitationsCalendar table tbody tr:nth-child(even) {
+    background-color: #fdfdfe; /* Very light background for even rows */
+}
+
+.engineer-dashboard #limitationsCalendar table tbody tr:hover {
+    background-color: #f1f3f5; /* Slightly darker hover */
+    cursor: default;
+}
+
+/* More distinct weekend styling */
+.engineer-dashboard #limitationsCalendar table tbody tr.table-secondary {
+    background-color: #fff3cd !important; /* Bootstrap warning yellow background for weekends */
+    color: #664d03; /* Darker text for weekends */
+    font-weight: normal; /* Reset font-weight if previously bold */
+}
+
+/* Style checkboxes (keep red for unavailable) */
+.engineer-dashboard .limitation-check {
+    cursor: pointer;
+    width: 1.2em;
+    height: 1.2em;
+    border: 1px solid #adb5bd;
+    transition: all 0.2s ease-in-out;
+}
+
+.engineer-dashboard .limitation-check:checked {
+    background-color: #dc3545; 
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+.engineer-dashboard .limitation-check:focus {
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25); 
+}
+
+/* Adjust select dropdown appearance */
+.engineer-dashboard .form-select {
+    border: 1px solid #ced4da;
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+
+.engineer-dashboard .form-select:focus {
+    border-color: #fd7e14; /* Orange focus border */
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(253, 126, 20, .25); /* Orange focus shadow */
+}
+
+/* Style the save button */
+.engineer-dashboard #btnSaveLimitations {
+    background-color: #fd7e14; /* Orange */
+    border-color: #fd7e14;
+    color: white;
+    padding: 0.5rem 1.5rem;
+    font-size: 1rem;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.engineer-dashboard #btnSaveLimitations:hover {
+    background-color: #e66800; 
+    border-color: #d96200;
+    color: white;
+}
+
+/* Print styles */
+@media print {
+
+}

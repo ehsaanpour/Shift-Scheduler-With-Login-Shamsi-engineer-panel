@@ -9,6 +9,49 @@
       "2": [
         "shift2"
       ],
+      "31": [
+        "shift2"
+      ],
+      "3": [
+        "shift1"
+      ],
+      "1": [
+        "shift2"
+      ],
+      "4": [
+        "shift1",
+        "shift2",
+        "shift3"
+      ],
+      "5": [
+        "shift2",
+        "shift3"
+      ],
+      "6": [
+        "shift1"
+      ],
+      "7": [
+        "shift1",
+        "shift2"
+      ],
+      "8": [
+        "shift2"
+      ],
+      "9": [
+        "shift2"
+      ],
+      "10": [
+        "shift2"
+      ],
+      "25": [
+        "shift2"
+      ],
+      "26": [
+        "shift2"
+      ],
+      "27": [
+        "shift2"
+      ],
       "28": [
         "shift2"
       ],
@@ -16,39 +59,6 @@
         "shift2"
       ],
       "30": [
-        "shift2"
-      ],
-      "31": [
-        "shift2"
-      ],
-      "1": [
-        "shift3"
-      ],
-      "3": [
-        "shift1"
-      ],
-      "4": [
-        "shift1"
-      ],
-      "5": [
-        "shift1"
-      ],
-      "6": [
-        "shift1"
-      ],
-      "7": [
-        "shift1"
-      ],
-      "8": [
-        "shift1",
-        "shift2"
-      ],
-      "9": [
-        "shift1",
-        "shift2"
-      ],
-      "10": [
-        "shift1",
         "shift2"
       ]
     },
@@ -72,16 +82,7 @@
       "Studio Press",
       "Nodal"
     ],
-    "limitations": {
-      "10": [
-        "shift1",
-        "shift2"
-      ],
-      "11": [
-        "shift1",
-        "shift2"
-      ]
-    },
+    "limitations": {},
     "minShifts": 10,
     "maxShifts": 30
   },

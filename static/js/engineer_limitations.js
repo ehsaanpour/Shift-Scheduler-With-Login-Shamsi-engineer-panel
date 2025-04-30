@@ -7,6 +7,22 @@ const persianDayNamesJS = [
     "شنبه", "یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنجشنبه", "جمعه"
 ];
 
+// Parse data passed from the template
+// Note: initialJalaliYear and initialJalaliMonth are already numbers
+let engineerData = {};
+try {
+    engineerData = JSON.parse(engineerDataJSON);
+} catch (e) {
+    console.error("Error parsing engineerDataJSON:", e, engineerDataJSON);
+}
+
+let persianMonthNamesJS = [];
+try {
+    persianMonthNamesJS = JSON.parse(persianMonthNamesJSON); 
+} catch (e) {
+    console.error("Error parsing persianMonthNamesJSON:", e, persianMonthNamesJSON);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     // Get references to elements
     const monthSelect = document.getElementById('monthSelect');
@@ -40,7 +56,7 @@ function generateLimitationsCalendar() {
 
     // --- Calendar Generation Logic (Adapted from main.js or similar) ---
     if (!jalaali.isValidJalaaliDate(year, month, 1)) {
-        calendarContainer.innerHTML = '<div class="alert alert-danger">Invalid Jalali date selected.</div>';
+        calendarContainer.innerHTML = '<div class="alert alert-danger">تاریخ جلالی انتخاب شده نامعتبر است.</div>';
         return;
     }
 
@@ -55,7 +71,7 @@ function generateLimitationsCalendar() {
 
     const thead = document.createElement('thead');
     const headerRow = document.createElement('tr');
-    const headers = ['Day', 'Shift 1 (Unavailable)', 'Shift 2 (Unavailable)', 'Shift 3 (Unavailable)'];
+    const headers = ['روز', 'شیفت ۱ (عدم دسترسی)', 'شیفت ۲ (عدم دسترسی)', 'شیفت ۳ (عدم دسترسی)'];
     headers.forEach(headerText => {
         const th = document.createElement('th');
         th.textContent = headerText;
@@ -65,8 +81,9 @@ function generateLimitationsCalendar() {
     table.appendChild(thead);
 
     const tbody = document.createElement('tbody');
-    // Get current limitations for this engineer
-    const currentLimitations = engineerData.limitations || {}; 
+    // Get current limitations for this engineer from the parsed data
+    // Make sure engineerData has limitations property
+    const currentLimitations = (engineerData && engineerData.limitations) ? engineerData.limitations : {}; 
 
     for (let day = 1; day <= daysInMonth; day++) {
         const jDate = jalaali.toGregorian(year, month, day);
@@ -82,7 +99,7 @@ function generateLimitationsCalendar() {
         // Day cell
         const dayCell = document.createElement('td');
         dayCell.className = 'fw-bold';
-        dayCell.textContent = `${day} (${persianDayNamesJS[dayOfWeek]})`;
+        dayCell.textContent = `${day} (${persianDayNamesJS[dayOfWeek] || ''})`; // Added fallback for safety
         row.appendChild(dayCell);
 
         // Shift limitation checkboxes
@@ -99,7 +116,8 @@ function generateLimitationsCalendar() {
             
             // Check if this shift is currently in limitations for this day
             // Limitations are stored as: { "day_number_str": ["shift1", "shift3"] }
-            if (currentLimitations[dayStr] && currentLimitations[dayStr].includes(shiftKey)) {
+            // Ensure currentLimitations[dayStr] exists and is an array
+            if (currentLimitations[dayStr] && Array.isArray(currentLimitations[dayStr]) && currentLimitations[dayStr].includes(shiftKey)) {
                 checkbox.checked = true;
             }
             
@@ -139,7 +157,7 @@ function saveLimitations() {
 
     // Disable button and show loading state
     const originalBtnText = saveButton.innerHTML;
-    saveButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
+    saveButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> در حال ذخیره...';
     saveButton.disabled = true;
 
     // Send data to API
@@ -165,19 +183,21 @@ function saveLimitations() {
         if (data.status === 'success') {
             // Update the global engineerData limitations in memory 
             // (important for re-generating calendar without full page reload)
-            engineerData.limitations = limitations; 
+            if (engineerData) { // Check if engineerData exists
+                engineerData.limitations = limitations; 
+            }
             
             // Show success feedback (maybe a temporary message near the button)
             const feedback = document.createElement('span');
             feedback.className = 'ms-2 text-success small';
-            feedback.textContent = 'Saved successfully!';
+            feedback.textContent = 'با موفقیت ذخیره شد!';
             saveButton.parentNode.insertBefore(feedback, saveButton.nextSibling);
             setTimeout(() => feedback.remove(), 3000);
 
             // Optionally: could show a more prominent alert, but might be excessive
-            // alert('Limitations saved successfully!'); 
+            // alert('محدودیت‌ها با موفقیت ذخیره شدند!');
         } else {
-             throw new Error(data.error || 'Failed to save limitations.');
+             throw new Error(data.error || 'ذخیره محدودیت‌ها ناموفق بود.');
         }
     })
     .catch(error => {
@@ -185,10 +205,10 @@ function saveLimitations() {
         // Show error feedback
         const feedback = document.createElement('span');
         feedback.className = 'ms-2 text-danger small';
-        feedback.textContent = `Error: ${error.message}`;
+        feedback.textContent = `خطا: ${error.message}`;
         saveButton.parentNode.insertBefore(feedback, saveButton.nextSibling);
         setTimeout(() => feedback.remove(), 5000);
-        // alert(`Failed to save limitations: ${error.message}`);
+        // alert(`ذخیره محدودیت‌ها ناموفق بود: ${error.message}`);
     })
     .finally(() => {
         // Restore button state

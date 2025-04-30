@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shift Scheduler</title>
+    <title>برنامه‌ریز شیفت - خانه</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/print.css') }}" media="print">
     <script src="{{ url_for('static', filename='js/highlight-patterns.js') }}"></script>
@@ -12,24 +12,24 @@
 
 {% extends "base.html" %}
 
-{% block title %}Shift Scheduler - Home{% endblock %}
+{% block title %}برنامه‌ریز شیفت - خانه{% endblock %}
 
 {% block content %}
 <div class="row mb-4">
     <div class="col-md-6">
-        <h1><i class="fas fa-calendar-alt me-2"></i>Shift Scheduler</h1>
-        <p class="lead">Schedule shifts for your engineering team across multiple workplaces</p>
+        <h1><i class="fas fa-calendar-alt me-2"></i>برنامه‌ریز شیفت</h1>
+        <p class="lead">شیفت‌ها را برای تیم مهندسی خود در محل‌های کار مختلف برنامه‌ریزی کنید</p>
     </div>
     <div class="col-md-6 text-end d-flex flex-column justify-content-end align-items-end">
         <div class="mb-2 small text-muted">
-            <i class="fas fa-info-circle me-1"></i> If the Generate Excel button doesn't work, try the Excel Generator page.
+            <i class="fas fa-info-circle me-1"></i> اگر دکمه تولید اکسل کار نمی‌کند، صفحه مولد اکسل را امتحان کنید.
         </div>
         <div>
             <button id="btnGenerate" class="btn btn-success me-2">
-                <i class="fas fa-file-excel me-1"></i> Generate Excel
+                <i class="fas fa-file-excel me-1"></i> تولید اکسل
             </button>
             <a href="/excel-generator" class="btn btn-outline-success">
-                <i class="fas fa-file-excel me-1"></i> Excel Generator
+                <i class="fas fa-file-excel me-1"></i> مولد اکسل
             </a>
         </div>
     </div>
@@ -38,15 +38,15 @@
 <!-- Display Limitation Update Notifications for Admin -->
 {% if session.user.role == 'admin' and unread_notifications %}
 <div class="alert alert-info alert-dismissible fade show" role="alert">
-    <h5 class="alert-heading"><i class="fas fa-bell me-2"></i>Recent Limitation Updates</h5>
+    <h5 class="alert-heading"><i class="fas fa-bell me-2"></i> به‌روزرسانی‌های اخیر محدودیت</h5>
     <ul class="list-unstyled mb-0">
     {% for notification in unread_notifications %}
         <li><i class="fas fa-user-edit me-1"></i> {{ notification.message }}</li>
     {% endfor %}
     </ul>
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="بستن"></button>
     <hr>
-    <p class="mb-0 small text-muted">These notifications have been marked as read for you. They will not appear next time unless new updates occur.</p>
+    <p class="mb-0 small text-muted">این اعلان‌ها برای شما خوانده شده علامت‌گذاری شدند. دفعه بعد نمایش داده نمی‌شوند مگر اینکه به‌روزرسانی‌های جدیدی رخ دهد.</p>
 </div>
 {% endif %}
 <!-- End Notifications -->
@@ -56,7 +56,7 @@
     <div class="col-md-3">
         <div class="card">
             <div class="card-header bg-primary text-white">
-                <h5 class="mb-0"><i class="fas fa-users me-2"></i>Engineers</h5>
+                <h5 class="mb-0"><i class="fas fa-users me-2"></i>مهندسان</h5>
             </div>
             <div class="card-body">
                 <div id="engineersList">
@@ -64,7 +64,7 @@
                 </div>
                 <hr>
                 <button class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#addEngineerModal">
-                    <i class="fas fa-plus me-1"></i> Add Engineer
+                    <i class="fas fa-plus me-1"></i> افزودن مهندس
                 </button>
             </div>
         </div>
@@ -75,25 +75,16 @@
         <div class="card">
             <div class="card-header bg-primary text-white">
                 <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-clock me-2"></i>Shift Scheduler</h5>
+                    <h5 class="mb-0"><i class="fas fa-clock me-2"></i>برنامه‌ریز شیفت</h5>
                     <div>
                         <select id="monthSelect" class="form-select form-select-sm d-inline-block me-2" style="width: 150px;">
-                            <option value="1">January</option>
-                            <option value="2">February</option>
-                            <option value="3">March</option>
-                            <option value="4">April</option>
-                            <option value="5">May</option>
-                            <option value="6">June</option>
-                            <option value="7">July</option>
-                            <option value="8">August</option>
-                            <option value="9">September</option>
-                            <option value="10">October</option>
-                            <option value="11">November</option>
-                            <option value="12">December</option>
+                            {# Options populated by JS #}
                         </select>
+                        <label for="monthSelect" class="visually-hidden">ماه</label>
                         <select id="yearSelect" class="form-select form-select-sm d-inline-block" style="width: 100px;">
                             <!-- Years will be populated dynamically -->
                         </select>
+                        <label for="yearSelect" class="visually-hidden">سال</label>
                     </div>
                 </div>
             </div>
@@ -120,7 +111,7 @@
                         <div class="d-flex justify-content-end mb-3">
                             <button class="btn btn-sm btn-outline-info import-pattern-btn" 
                                     data-workplace="{{ workplace }}">
-                                <i class="fas fa-file-import me-1"></i> Import Pattern
+                                <i class="fas fa-file-import me-1"></i> وارد کردن الگو
                             </button>
                         </div>
                         <div id="schedule-{{ workplace|replace(' ', '-')|lower }}">
@@ -132,20 +123,20 @@
             </div>
             <div class="card-footer text-end">
                 <div class="row align-items-center">
-                    <div class="col-md-6 text-start small">
-                        <div class="fw-bold mb-2">Shift Pattern Warnings:</div>
-                        <div class="mb-1"><span class="three-shifts-warning me-1">■</span> Engineer works all three shifts (1,2,3) in a single day across any studios</div>
-                        <div><span class="consecutive-days-warning me-1">■</span> Engineer has Shift 3 followed by Shift 1 the next day across any studios</div>
+                    <div class="col-md-6 text-start">
+                        <div class="fw-bold mb-2">هشدارهای الگوی شیفت:</div>
+                        <div class="mb-1"><span class="three-shifts-warning me-1">■</span> مهندس در یک روز در تمام استودیوها هر سه شیفت (۱، ۲، ۳) را کار می‌کند</div>
+                        <div><span class="consecutive-days-warning me-1">■</span> مهندس شیفت ۳ و به دنبال آن شیفت ۱ در روز بعد دارد</div>
                     </div>
                     <div class="col-md-6 text-end">
                         <button id="btnClearShifts" class="btn btn-danger me-2">
-                            <i class="fas fa-eraser me-1"></i> Clear All Shifts
+                            <i class="fas fa-eraser me-1"></i> پاک کردن همه شیفت‌ها
                         </button>
                         <button id="btnAutoAssign" class="btn btn-warning me-2">
-                            <i class="fas fa-magic me-1"></i> Auto-Assign Engineers
+                            <i class="fas fa-magic me-1"></i> تخصیص خودکار مهندسان
                         </button>
                         <button id="btnSaveSchedule" class="btn btn-primary">
-                            <i class="fas fa-save me-1"></i> Save Schedule
+                            <i class="fas fa-save me-1"></i> ذخیره برنامه
                         </button>
                     </div>
                 </div>
@@ -159,17 +150,17 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title"><i class="fas fa-user-plus me-2"></i>Add/Edit Engineer</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title"><i class="fas fa-user-plus me-2"></i>افزودن/ویرایش مهندس</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="بستن"></button>
             </div>
             <div class="modal-body">
                 <form id="engineerForm">
                     <div class="mb-3">
-                        <label for="engineerName" class="form-label">Name</label>
+                        <label for="engineerName" class="form-label">نام</label>
                         <input type="text" class="form-control" id="engineerName" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Workplaces</label>
+                        <label class="form-label">محل‌های کار</label>
                         {% for workplace in workplaces %}
                         <div class="form-check">
                             <input class="form-check-input workplace-check" type="checkbox" value="{{ workplace }}" id="check-{{ workplace|replace(' ', '-')|lower }}">
@@ -182,8 +173,8 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" id="btnSaveEngineer">Save</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">انصراف</button>
+                <button type="button" class="btn btn-primary" id="btnSaveEngineer">ذخیره</button>
             </div>
         </div>
     </div>
@@ -194,17 +185,17 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header bg-success text-white">
-                <h5 class="modal-title"><i class="fas fa-check-circle me-2"></i>Excel Files Generated</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title"><i class="fas fa-check-circle me-2"></i>فایل‌های اکسل تولید شد</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="بستن"></button>
             </div>
             <div class="modal-body">
-                <p>Excel files have been generated successfully!</p>
+                <p>فایل‌های اکسل با موفقیت تولید شدند!</p>
                 <ul id="downloadList" class="list-group">
                     <!-- Download links will be generated here -->
                 </ul>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">بستن</button>
             </div>
         </div>
     </div>
@@ -215,14 +206,14 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header bg-warning text-dark">
-                <h5 class="modal-title"><i class="fas fa-magic me-2"></i>Auto-Assignment Complete</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title"><i class="fas fa-magic me-2"></i>تخصیص خودکار کامل شد</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="بستن"></button>
             </div>
             <div class="modal-body">
                 <!-- Summary content will be generated dynamically -->
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">بستن</button>
             </div>
         </div>
     </div>
@@ -233,44 +224,44 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header bg-info text-white">
-                <h5 class="modal-title"><i class="fas fa-file-import me-2"></i>Import Pattern</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title"><i class="fas fa-file-import me-2"></i>وارد کردن الگو</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="بستن"></button>
             </div>
             <div class="modal-body">
-                <p>Upload an Excel file with engineer assignments pattern for <strong id="patternWorkplaceName"></strong>.</p>
-                <p class="small text-muted">The Excel file should have 30 or 31 rows (days) and 3 columns (shifts) with engineer names.</p>
+                <p>یک فایل اکسل با الگوی تخصیص مهندسان برای <strong id="patternWorkplaceName"></strong> آپلود کنید.</p>
+                <p class="small text-muted">فایل اکسل باید ۳۰ یا ۳۱ ردیف (روز) و ۳ ستون (شیفت) با نام مهندسان داشته باشد.</p>
                 
                 <form id="patternUploadForm" enctype="multipart/form-data">
                     <div class="mb-3">
-                        <label for="patternFile" class="form-label">Pattern File</label>
+                        <label for="patternFile" class="form-label">فایل الگو</label>
                         <input class="form-control" type="file" id="patternFile" accept=".xlsx,.xls">
                     </div>
                     
                     <div class="form-check mb-3">
                         <input class="form-check-input" type="checkbox" id="overrideExisting">
                         <label class="form-check-label" for="overrideExisting">
-                            Override existing assignments
+                            بازنویسی تخصیص‌های موجود
                         </label>
                     </div>
                     
                     <div class="form-check mb-3">
                         <input class="form-check-input" type="checkbox" id="respectLimitations" checked>
                         <label class="form-check-label" for="respectLimitations">
-                            Respect engineer limitations
+                            رعایت محدودیت‌های مهندس
                         </label>
                     </div>
                 </form>
                 
                 <div id="patternPreview" class="d-none">
-                    <h6 class="mt-3">Preview:</h6>
+                    <h6 class="mt-3">پیش‌نمایش:</h6>
                     <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
                         <table class="table table-sm table-bordered" id="patternPreviewTable">
                             <thead>
                                 <tr>
-                                    <th>Day</th>
-                                    <th>Shift 1</th>
-                                    <th>Shift 2</th>
-                                    <th>Shift 3</th>
+                                    <th>روز</th>
+                                    <th>شیفت ۱</th>
+                                    <th>شیفت ۲</th>
+                                    <th>شیفت ۳</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -281,12 +272,12 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">انصراف</button>
                 <button type="button" class="btn btn-info" id="btnPreviewPattern" disabled>
-                    <i class="fas fa-eye me-1"></i> Preview
+                    <i class="fas fa-eye me-1"></i> پیش‌نمایش
                 </button>
                 <button type="button" class="btn btn-primary" id="btnApplyPattern" disabled>
-                    <i class="fas fa-check me-1"></i> Apply Pattern
+                    <i class="fas fa-check me-1"></i> اعمال الگو
                 </button>
             </div>
         </div>
@@ -298,22 +289,22 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header bg-warning text-dark">
-                <h5 class="modal-title"><i class="fas fa-clock me-2"></i>Set Shift Limitations</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title"><i class="fas fa-clock me-2"></i>تنظیم محدودیت‌های شیفت</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="بستن"></button>
             </div>
             <div class="modal-body">
-                <p>Select days and shifts when the engineer is <strong>not available</strong> to work:</p>
+                <p>روزها و شیفت‌هایی را که مهندس برای کار در دسترس <strong>نیست</strong> انتخاب کنید:</p>
                 
                 <!-- Add Month/Year Selection Dropdowns -->
                 <div class="row mb-3 align-items-center">
                     <div class="col-auto">
-                        <label for="limitationsYearSelect" class="col-form-label">Year:</label>
+                        <label for="limitationsYearSelect" class="col-form-label">سال:</label>
                     </div>
                     <div class="col-auto">
                         <select id="limitationsYearSelect" class="form-select"></select>
                     </div>
                     <div class="col-auto">
-                        <label for="limitationsMonthSelect" class="col-form-label">Month:</label>
+                        <label for="limitationsMonthSelect" class="col-form-label">ماه:</label>
                     </div>
                     <div class="col-auto">
                         <select id="limitationsMonthSelect" class="form-select"></select>
@@ -326,9 +317,9 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">انصراف</button>
                 <button type="button" class="btn btn-primary" id="btnSaveLimitations">
-                    <i class="fas fa-save me-1"></i> Save Limitations
+                    <i class="fas fa-save me-1"></i> ذخیره محدودیت‌ها
                 </button>
             </div>
         </div>
@@ -341,39 +332,38 @@
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title">
-                    <i class="fas fa-sliders-h me-2"></i>Adjust Shift Limits
+                    <i class="fas fa-sliders-h me-2"></i>تنظیم محدودیت‌های شیفت
                 </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="بستن"></button>
             </div>
             <div class="modal-body">
-                <p>Set the minimum and maximum number of shifts for <span id="shiftLimitsEngineerName" class="fw-bold"></span>:</p>
+                <p>حداقل و حداکثر تعداد شیفت‌ها را برای <span id="shiftLimitsEngineerName" class="fw-bold"></span> تنظیم کنید:</p>
                 
                 <div class="mb-3">
-                    <label for="minShifts" class="form-label">Minimum Shifts:</label>
+                    <label for="minShifts" class="form-label">حداقل شیفت‌ها:</label>
                     <input type="number" class="form-control" id="minShifts" min="1" max="50" value="10">
-                    <div class="form-text">Minimum number of shifts this engineer should have</div>
+                    <div class="form-text">حداقل تعداد شیفت‌هایی که این مهندس باید داشته باشد</div>
                 </div>
                 
                 <div class="mb-3">
-                    <label for="maxShifts" class="form-label">Maximum Shifts:</label>
+                    <label for="maxShifts" class="form-label">حداکثر شیفت‌ها:</label>
                     <input type="number" class="form-control" id="maxShifts" min="1" max="100" value="30">
-                    <div class="form-text">Maximum number of shifts this engineer should have</div>
+                    <div class="form-text">حداکثر تعداد شیفت‌هایی که این مهندس باید داشته باشد</div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" id="saveShiftLimits">Save Limits</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">انصراف</button>
+                <button type="button" class="btn btn-primary" id="saveShiftLimits">ذخیره محدودیت‌ها</button>
             </div>
         </div>
     </div>
 </div>
 
 <div class="mt-3">
-    <h6>Legend:</h6>
+    <h6>راهنما:</h6>
     <ul>
-        <li><span style="background-color: #f8d7da; color: #721c24; padding: 2px 5px; border-radius: 3px;">Red Highlight</span>: 3 shifts within 24 hours.</li>
-        <li><span style="background-color: #cce5ff; color: #004085; padding: 2px 5px; border-radius: 3px;">Blue Highlight</span>: Working consecutive days.</li>
-        <li><span style="background-color: #fff3cd; color: #856404; padding: 2px 5px; border-radius: 3px;">Yellow Highlight</span>: Three consecutive days in Shift 3.</li>
+        <li><span class="three-shifts-warning me-1">■</span> مهندس هر سه شیفت (۱، ۲، ۳) را در یک روز کار می‌کند</li>
+        <li><span class="consecutive-days-warning me-1">■</span> مهندس شیفت ۳ و سپس شیفت ۱ در روز بعد دارد</li>
     </ul>
 </div>
 
@@ -518,7 +508,7 @@ document.addEventListener('DOMContentLoaded', function() {
             select.value = '';
             
             // Remove any highlight classes
-            select.classList.remove('three-shifts-warning', 'consecutive-days-warning');
+            select.classList.remove('three-shifts-warning', 'consecutive-days-warning', 'three-shift3-warning');
         });
         
         // Get current month and year for saving
@@ -567,7 +557,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Force reset all selects again to be sure
                 document.querySelectorAll('.engineer-select').forEach(select => {
                     select.value = '';
-                    select.classList.remove('three-shifts-warning', 'consecutive-days-warning');
+                    select.classList.remove('three-shifts-warning', 'consecutive-days-warning', 'three-shift3-warning');
                 });
             }
         })
@@ -654,7 +644,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Just ensure all fields are still empty and highlights are removed
                     document.querySelectorAll('.engineer-select').forEach(select => {
                         select.value = '';
-                        select.classList.remove('three-shifts-warning', 'consecutive-days-warning');
+                        select.classList.remove('three-shifts-warning', 'consecutive-days-warning', 'three-shift3-warning');
                     });
                 }
             }
@@ -714,29 +704,31 @@ document.addEventListener('DOMContentLoaded', function() {
             const editBtn = document.createElement('button');
             editBtn.classList.add('btn', 'btn-sm', 'btn-outline-primary', 'me-1');
             editBtn.innerHTML = '<i class="fas fa-edit"></i>';
+            editBtn.title = 'ویرایش مهندس';
             editBtn.addEventListener('click', () => editEngineer(eng));
             
             const limitBtn = document.createElement('button');
             limitBtn.classList.add('btn', 'btn-sm', 'btn-outline-warning', 'me-1');
             limitBtn.innerHTML = '<i class="fas fa-clock"></i>';
-            limitBtn.title = 'Set shift limitations';
+            limitBtn.title = 'تنظیم محدودیت‌های شیفت';
             limitBtn.addEventListener('click', () => showLimitationsModal(eng));
             
             const clearLimitBtn = document.createElement('button');
             clearLimitBtn.classList.add('btn', 'btn-sm', 'btn-outline-danger', 'me-1');
             clearLimitBtn.innerHTML = '<i class="fas fa-calendar-times"></i>';
-            clearLimitBtn.title = 'Clear all shift limitations';
+            clearLimitBtn.title = 'پاک کردن همه محدودیت‌های شیفت';
             clearLimitBtn.addEventListener('click', () => clearAllLimitations(eng));
             
             const shiftLimitsBtn = document.createElement('button');
             shiftLimitsBtn.classList.add('btn', 'btn-sm', 'btn-outline-info', 'me-1');
             shiftLimitsBtn.innerHTML = '<i class="fas fa-sliders-h"></i>';
-            shiftLimitsBtn.title = 'Adjust min/max shifts';
+            shiftLimitsBtn.title = 'تنظیم حداقل/حداکثر شیفت‌ها';
             shiftLimitsBtn.addEventListener('click', () => showShiftLimitsModal(eng));
             
             const deleteBtn = document.createElement('button');
             deleteBtn.classList.add('btn', 'btn-sm', 'btn-outline-danger');
             deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+            deleteBtn.title = 'حذف مهندس';
             deleteBtn.addEventListener('click', () => deleteEngineer(eng.name));
             
             actions.appendChild(editBtn);
@@ -750,17 +742,17 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const workplaces = document.createElement('small');
             workplaces.classList.add('text-muted');
-            workplaces.textContent = `Workplaces: ${eng.workplaces.join(', ')}`;
+            workplaces.textContent = `محل‌های کار: ${eng.workplaces.join(', ')}`;
             
             // Add limitations info if any
             const limitCount = eng.limitations ? Object.keys(eng.limitations).reduce((count, day) => {
-                return count + eng.limitations[day].length;
+                return count + (Array.isArray(eng.limitations[day]) ? eng.limitations[day].length : 0);
             }, 0) : 0;
             
             if (limitCount > 0) {
                 const limitations = document.createElement('small');
                 limitations.classList.add('text-danger', 'd-block', 'mt-1');
-                limitations.innerHTML = `<i class="fas fa-exclamation-circle me-1"></i>Has ${limitCount} shift limitations`;
+                limitations.innerHTML = `<i class="fas fa-exclamation-circle me-1"></i>دارای ${limitCount} محدودیت شیفت`;
             
                 cardBody.appendChild(nameRow);
                 cardBody.appendChild(workplaces);
@@ -774,7 +766,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (eng.minShifts || eng.maxShifts) {
                 const shiftsLimits = document.createElement('small');
                 shiftsLimits.classList.add('text-info', 'd-block', 'mt-1');
-                shiftsLimits.innerHTML = `<i class="fas fa-sliders-h me-1"></i>Shifts: Min ${eng.minShifts || 10}, Max ${eng.maxShifts || 30}`;
+                shiftsLimits.innerHTML = `<i class="fas fa-sliders-h me-1"></i>شیفت‌ها: حداقل ${eng.minShifts || 10}، حداکثر ${eng.maxShifts || 30}`;
             
                 cardBody.appendChild(shiftsLimits);
             }
@@ -809,7 +801,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function saveEngineer() {
         const name = document.getElementById('engineerName').value.trim();
         if (!name) {
-            alert('Please enter engineer name');
+            alert('لطفاً نام مهندس را وارد کنید');
             return;
         }
         
@@ -819,7 +811,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         if (workplaces.length === 0) {
-            alert('Please select at least one workplace');
+            alert('لطفاً حداقل یک محل کار را انتخاب کنید');
             return;
         }
         
@@ -843,7 +835,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Show loading indicator
         document.getElementById('btnSaveEngineer').disabled = true;
-        document.getElementById('btnSaveEngineer').innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
+        document.getElementById('btnSaveEngineer').innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> در حال ذخیره...';
         
         fetch('/api/engineers', {
             method: 'POST',
@@ -893,7 +885,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function deleteEngineer(name) {
-        if (confirm(`Are you sure you want to delete ${name}?`)) {
+        if (confirm(`آیا از حذف ${name} مطمئن هستید؟`)) {
             fetch(`/api/engineers/${name}`, {
                 method: 'DELETE',
             })
@@ -947,7 +939,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Create header
             const thead = document.createElement('thead');
             const headerRow = document.createElement('tr');
-            const headers = ['Day', 'Shift 1', 'Shift 2', 'Shift 3'];
+            const headers = ['روز', 'شیفت ۱', 'شیفت ۲', 'شیفت ۳'];
             
             headers.forEach(header => {
                 const th = document.createElement('th');
@@ -969,7 +961,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const currentDayOfWeekGreg = currentDayDateObject.getDay(); // 0=Sun, 1=Mon, ..., 4=Thu, 5=Fri, 6=Sat
                 
                 // Correct weekend check for Persian calendar (Thursday=4, Friday=5)
-                const isWeekend = (currentDayOfWeekGreg === 4 || currentDayOfWeekGreg === 5); 
+                const isWeekend = (currentDayOfWeekGreg === 4 || currentDayOfWeekGreg === 5);
                 
                 const row = document.createElement('tr');
                 if (isWeekend) {
@@ -1005,7 +997,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Empty option
                     const emptyOption = document.createElement('option');
                     emptyOption.value = '';
-                    emptyOption.textContent = '---'; // Shorter placeholder
+                    emptyOption.textContent = '---'; // Keep placeholder short
                     select.appendChild(emptyOption);
                     
                     // Filter engineers who can work in this workplace
@@ -1046,7 +1038,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // First, reset all select elements to empty and remove highlighting
                 document.querySelectorAll('.engineer-select').forEach(select => {
                     select.value = '';
-                    select.classList.remove('three-shifts-warning', 'consecutive-days-warning');
+                    select.classList.remove('three-shifts-warning', 'consecutive-days-warning', 'three-shift3-warning');
                 });
                 
                 // Then fill in values from the loaded schedule
@@ -1078,6 +1070,7 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .catch(error => {
                 console.error('Error loading schedule:', error);
+                 alert('بارگذاری برنامه ناموفق بود.');
             });
     }
     
@@ -1099,8 +1092,8 @@ document.addEventListener('DOMContentLoaded', function() {
         
         console.log(`Analyzing schedule based on ${selectElements.length} select elements`);
         
-        // Get number of days in month
-        const daysInMonth = new Date(year, month, 0).getDate();
+        // Get number of days in month using jalaali for accuracy
+        const daysInMonth = jalaali.jalaaliMonthLength(year, month);
         
         // Create a map to track each engineer's shifts by day, reading from DOM
         const engineerShifts = {};
@@ -1134,7 +1127,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Reset all highlights first
         selectElements.forEach(select => {
-            select.classList.remove('three-shifts-warning', 'consecutive-days-warning');
+            select.classList.remove('three-shifts-warning', 'consecutive-days-warning', 'three-shift3-warning');
         });
         
         // Apply highlights for challenging patterns based on the collected data
@@ -1275,13 +1268,13 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Day header
         const dayHeader = document.createElement('th');
-        dayHeader.textContent = 'Day';
+        dayHeader.textContent = 'روز';
         headerRow.appendChild(dayHeader);
         
         // Shift headers
         for (let i = 1; i <= 3; i++) {
             const shiftHeader = document.createElement('th');
-            shiftHeader.textContent = `Shift ${i}`;
+            shiftHeader.textContent = `شیفت ${i}`;
             shiftHeader.className = 'text-center'; // Center shift headers
             headerRow.appendChild(shiftHeader);
         }
@@ -1341,7 +1334,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const label = document.createElement('label');
                 label.className = 'form-check-label visually-hidden'; // Hide label visually but keep for accessibility
                 label.htmlFor = checkboxId;
-                label.textContent = `Not Available Day ${day} Shift ${shift}`;
+                label.textContent = `عدم دسترسی روز ${day} شیفت ${shift}`;
                 
                 checkboxWrapper.appendChild(checkbox);
                 checkboxWrapper.appendChild(label);
@@ -1415,7 +1408,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 loadEngineers();
                 
                 // Show success message
-                alert('Limitations saved successfully!');
+                alert('محدودیت‌ها با موفقیت ذخیره شدند!');
             }
         })
         .catch(error => {
@@ -1445,13 +1438,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const maxShifts = parseInt(document.getElementById('maxShifts').value);
         
         // Validate inputs
-        if (minShifts <= 0 || maxShifts <= 0) {
-            alert('Shift limits must be positive numbers.');
+        if (isNaN(minShifts) || isNaN(maxShifts) || minShifts <= 0 || maxShifts <= 0) {
+            alert('محدودیت‌های شیفت باید اعداد مثبت باشند.');
             return;
         }
         
         if (minShifts > maxShifts) {
-            alert('Minimum shifts cannot be greater than maximum shifts.');
+            alert('حداقل شیفت‌ها نمی‌تواند بیشتر از حداکثر شیفت‌ها باشد.');
             return;
         }
         
@@ -1490,7 +1483,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 loadEngineers();
                 
                 // Show success message
-                alert('Shift limits saved successfully!');
+                alert('محدودیت‌های شیفت با موفقیت ذخیره شدند!');
             }
         })
         .catch(error => {
@@ -1503,7 +1496,9 @@ document.addEventListener('DOMContentLoaded', function() {
     function clearAllLimitations(engineer) {
         if (!engineer) return;
         
-        if (confirm(`Are you sure you want to clear ALL shift limitations for ${engineer.name}? This action cannot be undone.`)) {
+        const confirmationMessage = `آیا از پاک کردن تمام محدودیت‌های شیفت برای ${engineer.name} مطمئن هستید؟ این عمل قابل بازگشت نیست.`;
+        
+        if (confirm(confirmationMessage)) {
             
             // Create the payload with cleared limitations
             const payload = {
@@ -1595,7 +1590,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     const downloadLink = document.createElement('a');
                     downloadLink.href = `/api/download/${file}`;
                     downloadLink.classList.add('btn', 'btn-sm', 'btn-outline-primary');
-                    downloadLink.innerHTML = '<i class="fas fa-download me-1"></i> Download';
+                    downloadLink.innerHTML = '<i class="fas fa-download me-1"></i> دانلود';
                     downloadLink.download = file;
                     
                     li.appendChild(fileName);
@@ -1612,6 +1607,16 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Failed to generate Excel files. Please make sure you have saved the schedule.');
         });
     }
+
+    // Add the showAlert function if it's not defined elsewhere (basic example)
+    if (typeof showAlert !== 'function') {
+        window.showAlert = function(message, type = 'info') {
+            // Basic implementation using standard alert
+            // For a better UX, you'd replace this with a Bootstrap alert component or similar
+            alert(`[${type.toUpperCase()}] ${message}`);
+        }
+    }
+
 });
 </script>
 {% endblock %}
