@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify, render_template, redirect, url_for, s
 import json
 import os
 import calendar
-from datetime import datetime
+from datetime import datetime, timezone
 import openpyxl
 from openpyxl.styles import PatternFill, Border, Side, Alignment, Font
 from openpyxl.utils import get_column_letter
@@ -17,7 +17,11 @@ from functools import wraps # Add this import at the top
 import uuid # For unique notification IDs
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
-app.secret_key = secrets.token_hex(16)  # Generate a random secret key
+# IMPORTANT: Set a fixed secret key. 
+# For production, use an environment variable: app.secret_key = os.environ.get('SECRET_KEY')
+# For development, you can use a hardcoded string (change this!):
+app.secret_key = 'your-super-secret-and-long-random-string-here' 
+# app.secret_key = secrets.token_hex(16)  # Commented out random generation
 
 # Set up logging
 logging.basicConfig(level=logging.INFO) # Add basic logging configuration
@@ -48,6 +52,7 @@ ENGINEERS_FILE = os.path.join(DATA_DIR, 'engineers.json')
 SCHEDULES_FILE = os.path.join(DATA_DIR, 'schedules.json')
 USERS_FILE = os.path.join(DATA_DIR, 'users.json')
 NOTIFICATIONS_FILE = os.path.join(DATA_DIR, 'notifications.json') # New notifications file
+MESSAGES_FILE = os.path.join(DATA_DIR, 'messages.json') # New messages file
 WORKPLACES = ["Studio Hispan", "Studio Press", "Nodal", "Engineer Room"]
 SHIFTS = ["Shift 1", "Shift 2", "Shift 3"]
 
@@ -74,6 +79,11 @@ if not os.path.exists(USERS_FILE):
 # --- Initialize Notifications File ---
 if not os.path.exists(NOTIFICATIONS_FILE):
     with open(NOTIFICATIONS_FILE, 'w') as f:
+        json.dump([], f) # Initialize with an empty list
+
+# --- Initialize Messages File ---
+if not os.path.exists(MESSAGES_FILE):
+    with open(MESSAGES_FILE, 'w') as f:
         json.dump([], f) # Initialize with an empty list
 
 # Authentication functions
@@ -207,30 +217,32 @@ def save_schedules(schedules):
 
 # Login required decorator
 def login_required(f):
+    @wraps(f) # Use wraps
     def decorated_function(*args, **kwargs):
         if 'user' not in session:
+            flash('لطفا برای دسترسی به این صفحه وارد شوید.', 'warning') # Translated
             return redirect(url_for('login_page'))
         return f(*args, **kwargs)
-    decorated_function.__name__ = f.__name__
+    # decorated_function.__name__ = f.__name__ # No longer needed
     return decorated_function
 
 # Admin required decorator
 def admin_required(f):
-    @wraps(f) # Use wraps to preserve function metadata
+    @wraps(f) # Use wraps
     def decorated_function(*args, **kwargs):
         if 'user' not in session:
-            flash('Please log in to access this page.', 'warning')
+            flash('لطفا برای دسترسی به این صفحه وارد شوید.', 'warning') # Translated
             return redirect(url_for('login_page'))
         # Check for 'role' key and if it's 'admin'
         if session['user'].get('role') != 'admin': 
-            flash('You need admin privileges to access this page.', 'danger')
+            flash('برای دسترسی به این صفحه به سطح دسترسی ادمین نیاز دارید.', 'danger') # Translated
             # Redirect non-admins to their dashboard or login
             if session['user'].get('role') == 'engineer':
                  return redirect(url_for('engineer_dashboard'))
             else: # Unknown role or missing role
+                 session.clear() # Clear potentially invalid session
                  return redirect(url_for('login_page'))
         return f(*args, **kwargs)
-    # decorated_function.__name__ = f.__name__ # No longer needed with @wraps
     return decorated_function
 
 # Engineer required decorator
@@ -238,18 +250,20 @@ def engineer_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user' not in session:
-            flash('Please log in to access this page.', 'warning')
+            flash('لطفا برای دسترسی به این صفحه وارد شوید.', 'warning') # Translated
             return redirect(url_for('login_page'))
         if session['user'].get('role') != 'engineer':
-            flash('You need engineer privileges to access this page.', 'danger')
+            flash('برای دسترسی به این صفحه به سطح دسترسی مهندس نیاز دارید.', 'danger') # Translated
              # Redirect non-engineers to admin dashboard or login
             if session['user'].get('role') == 'admin':
                  return redirect(url_for('index')) # Or admin_page? index seems the main admin view
             else: # Unknown role or missing role
+                 session.clear() # Clear potentially invalid session
                  return redirect(url_for('login_page'))
-        # Check if engineer is linked - might be needed later
+        # Check if engineer is linked
         if not session['user'].get('engineer_name'):
-             flash('Your user account is not linked to an engineer profile. Please contact an admin.', 'danger')
+             # Already translated in previous step
+             flash('حساب کاربری شما به پروفایل مهندس متصل نیست. لطفا با ادمین تماس بگیرید.', 'danger') 
              session.clear() # Log out user with incomplete setup
              return redirect(url_for('login_page'))
         return f(*args, **kwargs)
@@ -295,22 +309,27 @@ def login_page():
         
         # --- Redirect based on role ---
         if user["role"] == "admin":
-            flash(f"Admin login successful. Welcome, {user['username']}!", 'success')
+            # Translate admin success message
+            flash(f"ورود ادمین موفقیت‌آمیز بود. خوش آمدید {user['username']}!", 'success') 
             return redirect(url_for('index')) # Redirect admin to main schedule page
         elif user["role"] == "engineer":
              # Check if engineer name exists before redirecting
             if user.get('engineer_name'):
-                 flash(f"Engineer login successful. Welcome, {user['engineer_name']}!", 'success')
+                 # Translate engineer success message and add logging
+                 logging.info(f"Flashing engineer welcome message for: {user['engineer_name']}") # Add log
+                 flash(f"ورود مهندس موفقیت‌آمیز بود. خوش آمدید {user['engineer_name']}!", 'success') # Translated
                  return redirect(url_for('engineer_dashboard')) # Redirect engineer to their dashboard
             else:
                 # This case should ideally be prevented by admin setup, but handle defensively
                 session.clear() # Log out incomplete user
-                flash('Login failed: Engineer account not fully configured. Contact admin.', 'danger')
+                # Translate error message
+                flash('ورود ناموفق: حساب کاربری مهندس به طور کامل پیکربندی نشده است. با ادمین تماس بگیرید.', 'danger') 
                 return redirect(url_for('login_page'))
         else:
             # Fallback for unknown roles
             session.clear() # Log out
-            flash('Login failed: Unknown user role.', 'danger')
+             # Translate error message
+            flash('ورود ناموفق: نقش کاربر ناشناخته است.', 'danger')
             return redirect(url_for('login_page'))
 
     # If GET request
@@ -325,11 +344,9 @@ def login_page():
             else:
                  # Log out if session data is incomplete
                  session.clear()
-                 flash('Session invalid. Please log in again.', 'warning')
+                 # Translate warning message
+                 flash('نشست نامعتبر است. لطفا دوباره وارد شوید.', 'warning') 
                  return redirect(url_for('login_page'))
-        else: # Unknown role in session
-            session.clear()
-            return redirect(url_for('login_page'))
 
     # Show login page if not logged in
     return render_template("login.html", error=None)
@@ -346,28 +363,34 @@ def admin_page():
     # --- Mark notifications as read for this admin ---
     admin_username = session['user']['username']
     mark_notifications_as_read(admin_username)
-    # -----------------------------------------------
-    
+    # --- End Mark Notifications ---
+
     users = load_users()
-    engineers = load_engineers() # Load engineers too
+    engineers = load_engineers() # Load engineers for linking
+    
+    # Get unread message counts for all engineers
+    unread_admin_counts = get_unread_admin_message_counts()
 
-    # Get engineers who *don't* have a user account yet
-    linked_engineer_names = {u['engineer_name'] for u in users if u['role'] == 'engineer' and u['engineer_name']}
-    available_engineers_for_linking = [eng for eng in engineers if eng['name'] not in linked_engineer_names]
-
-    # Prepare users display, removing password hash
-    users_display = []
+    # Prepare users data, adding engineer link info and unread counts
+    processed_users = []
     for user in users:
-        users_display.append({
-            "username": user["username"],
-            "role": user["role"],
-            "engineer_name": user.get("engineer_name", "N/A") # Show N/A if missing
-        })
+        engineer_exists = False
+        if user.get('role') == 'engineer' and user.get('engineer_name'):
+            engineer_exists = any(e['name'] == user['engineer_name'] for e in engineers)
+        user_data = user.copy() # Avoid modifying original dict
+        user_data['engineer_exists'] = engineer_exists
+        # Add unread count for this engineer if they are an engineer
+        if user.get('role') == 'engineer' and user.get('engineer_name'):
+             user_data['unread_message_count'] = unread_admin_counts.get(user['engineer_name'], 0)
+        else:
+             user_data['unread_message_count'] = 0 # Admins don't have messages tied this way
+             
+        processed_users.append(user_data)
 
-    return render_template("admin.html",
-                           users=users_display,
-                           available_engineers=available_engineers_for_linking, # Pass engineers for dropdown
-                           username=session['user']['username'])
+    return render_template('admin.html', 
+                            users=processed_users, 
+                            engineers=engineers, # Pass engineers for dropdown
+                            username=session['user']['username'])
 
 @app.route('/admin/users', methods=['POST'])
 @admin_required
@@ -825,31 +848,36 @@ def create_excel_schedule(file_path, workplace, year, month, schedule_data):
 @engineer_required # Protect this route
 def engineer_dashboard():
     # Get engineer's name from session
-    engineer_name = session['user']['engineer_name']
-    
-    # Load all engineers and find the current one
-    engineers = load_engineers()
-    current_engineer = next((eng for eng in engineers if eng['name'] == engineer_name), None)
-    
-    if not current_engineer:
-        # This shouldn't happen if @engineer_required works, but handle defensively
-        flash('Could not find your engineer profile. Please contact admin.', 'danger')
-        session.clear() # Log out
+    engineer_name = session.get('user', {}).get('engineer_name')
+    if not engineer_name:
+        flash('خطا: نام مهندس مرتبط یافت نشد.', 'danger')
         return redirect(url_for('login_page'))
 
-    # Get current Jalali date for calendar defaults
+    engineers = load_engineers()
+    engineer = next((eng for eng in engineers if eng['name'] == engineer_name), None)
+
+    if not engineer:
+        flash(f'خطا: اطلاعات مهندس برای {engineer_name} یافت نشد.', 'danger')
+        return redirect(url_for('login_page'))
+
+    # Get current Jalali date for default selection
     now_gregorian = datetime.now()
     now_jalali = jdt.datetime.fromgregorian(datetime=now_gregorian)
     current_jalali_year = now_jalali.year
     current_jalali_month = now_jalali.month
 
-    return render_template("engineer_dashboard.html", 
-                           engineer=current_engineer, 
-                           username=session['user']['username'],
-                           current_jalali_year=current_jalali_year,
-                           current_jalali_month=current_jalali_month,
-                           persian_month_names=PERSIAN_MONTH_NAMES
-                           )
+    # Get unread message count for this engineer
+    unread_message_count = get_unread_engineer_message_count(engineer_name)
+
+    return render_template(
+        'engineer_dashboard.html', 
+        engineer=engineer, 
+        username=session['user']['username'], # Pass username
+        current_jalali_year=current_jalali_year,
+        current_jalali_month=current_jalali_month,
+        persian_month_names=PERSIAN_MONTH_NAMES,
+        unread_message_count=unread_message_count # Pass unread count
+    )
 
 # --- API Endpoint for Engineer Saving Limitations ---
 @app.route('/api/engineer/limitations', methods=['POST'])
@@ -857,64 +885,72 @@ def engineer_dashboard():
 def save_engineer_limitations():
     engineer_name = session['user']['engineer_name']
     data = request.json
-    limitations = data.get('limitations', {})
+    # These are the limitations submitted for the currently viewed month
+    new_month_limitations = data.get('limitations', {})
     year = data.get('year')
     month = data.get('month')
 
     if not year or not month:
          return jsonify({"error": "Year and month are required to save limitations."}), 400
 
+    try:
+        year_int = int(year)
+        month_int = int(month)
+        # Calculate number of days in the specific month
+        if 1 <= month_int <= 6:
+            days_in_month = 31
+        elif 7 <= month_int <= 11:
+            days_in_month = 30
+        elif month_int == 12:
+            days_in_month = 30 if jdt.isleap(year_int) else 29
+        else:
+            raise ValueError("Invalid month")
+    except ValueError:
+         return jsonify({"error": "Invalid year or month provided."}), 400
+
     print(f"Saving limitations for engineer: {engineer_name}, Year: {year}, Month: {month}")
-    print(f"Received limitations data: {limitations}")
+    # print(f"Received limitations data for this month: {new_month_limitations}")
 
     engineers = load_engineers()
     engineer_found = False
+    updated_engineer_limitations = None
+
     for eng in engineers:
         if eng['name'] == engineer_name:
-            if 'limitations' not in eng: # Ensure limitations key exists
-                eng['limitations'] = {}
+            # Get a copy of the engineer's existing limitations or an empty dict
+            # IMPORTANT: Assumes limitations are stored flatly by day number string key
+            current_eng_limits = eng.get('limitations', {}).copy()
+            print(f"LIMIT_SAVE: Existing limitations for {engineer_name}: {current_eng_limits}")
+
+            # Iterate through the days *of the month being edited*
+            for day in range(1, days_in_month + 1):
+                day_str = str(day)
                 
-            # --- Option 1: Merge limitations (keeps old months) --- 
-            # eng['limitations'].update(limitations) 
+                # Check if this day was submitted with new limitations
+                if day_str in new_month_limitations:
+                    # Update or add the limitation for this day
+                    current_eng_limits[day_str] = new_month_limitations[day_str]
+                else:
+                    # If the day was *not* submitted, it means it should be cleared *if it existed before*
+                    if day_str in current_eng_limits:
+                        del current_eng_limits[day_str]
             
-            # --- Option 2: Replace limitations for the specific month --- 
-            # (More complex: would need to filter existing keys based on year/month 
-            # or restructure limitations to be period-based like schedules) 
-
-            # --- Option 3: Simple Overwrite (easiest, replaces ALL old limitations) ---
-            # This seems implied by the UI where user selects month/year and saves.
-            # Let's refine this: We only want to save limitations for the *visible* month.
-            # We need to preserve limitations for *other* months.
+            # Limitations for days outside this month remain untouched in current_eng_limits
             
-            # Create a new limitations object, copying old ones not in the current month/year
-            new_limitations = {}
-            current_month_days = {str(d) for d in range(1, 32)} # Max possible days
-            
-            if isinstance(eng.get('limitations'), dict):
-                for day_key, day_limits in eng['limitations'].items():
-                    # Assume keys are just day numbers for now (as in original code)
-                    # A more robust system would store year-month-day
-                    # For now, we overwrite based on simple day keys if they exist in the new data.
-                     if str(day_key) not in limitations: # Keep old limitation if not in new data
-                          new_limitations[str(day_key)] = day_limits
-
-            # Add/overwrite with the new limitations for the current view
-            new_limitations.update(limitations) 
-
-            eng['limitations'] = new_limitations
-            # --------------------------------------------------------------------
-            
+            # Update the engineer's limitations in the list
+            eng['limitations'] = current_eng_limits
+            updated_engineer_limitations = current_eng_limits # Store for logging
             engineer_found = True
             break
     
     if not engineer_found:
         return jsonify({"error": "Engineer profile not found."}), 404
 
+    print(f"LIMIT_SAVE: Updated limitations for {engineer_name}: {updated_engineer_limitations}")
     save_engineers(engineers)
     
-    # --- Add Notification for Admin with context ---
+    # Add Notification for Admin
     add_limitation_update_notification(engineer_name, year, month) 
-    # ----------------------------------
     
     return jsonify({"status": "success"})
 
@@ -937,7 +973,7 @@ def add_limitation_update_notification(engineer_name, year, month):
     
     new_notification = {
         "id": str(uuid.uuid4()), # Unique ID
-        "timestamp": datetime.utcnow().isoformat(), # Store timestamp
+        "timestamp": datetime.utcnow().isoformat(), # Corrected: Removed extra datetime.
         "type": "limitations_updated",
         "engineer_name": engineer_name,
         "year": year, # Store year
@@ -972,6 +1008,172 @@ def mark_notifications_as_read(admin_username):
              updated = True
     if updated:
         save_notifications(notifications)
+
+# --- Messaging Helper Functions ---
+def load_messages():
+    try:
+        with open(MESSAGES_FILE, 'r', encoding='utf-8') as f:
+            # Handle empty file case
+            content = f.read()
+            if not content:
+                return []
+            return json.loads(content)
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        print(f"Error loading messages: {e}")
+        return [] # Return empty list on error
+
+def save_messages(messages):
+    try:
+        with open(MESSAGES_FILE, 'w', encoding='utf-8') as f:
+            json.dump(messages, f, indent=2, ensure_ascii=False)
+    except IOError as e:
+        print(f"Error saving messages: {e}")
+
+def add_message(engineer_name, sender_role, content):
+    messages = load_messages()
+    new_message = {
+        "message_id": str(uuid.uuid4()),
+        "engineer_name": engineer_name, # Always the engineer involved
+        "sender_role": sender_role, # 'engineer' or 'admin'
+        "timestamp": datetime.now(timezone.utc).isoformat(), 
+        "content": content,
+        "read_by_engineer": sender_role == 'engineer', # Read by sender initially
+        "read_by_admin": sender_role == 'admin'    # Read by sender initially
+    }
+    messages.append(new_message)
+    save_messages(messages)
+    return new_message
+
+def get_messages_for_engineer(engineer_name):
+    messages = load_messages()
+    engineer_messages = [m for m in messages if m.get('engineer_name') == engineer_name]
+    # Sort by timestamp ascending
+    engineer_messages.sort(key=lambda x: x.get('timestamp', ''))
+    return engineer_messages
+
+def mark_engineer_messages_as_read(engineer_name):
+    messages = load_messages()
+    updated = False
+    for msg in messages:
+        # Mark messages *sent by admin* to this engineer as read
+        if msg.get('engineer_name') == engineer_name and \
+           msg.get('sender_role') == 'admin' and \
+           not msg.get('read_by_engineer', False):
+            msg['read_by_engineer'] = True
+            updated = True
+    if updated:
+        save_messages(messages)
+    return updated
+
+def mark_admin_messages_as_read(engineer_name):
+    messages = load_messages()
+    updated = False
+    for msg in messages:
+        # Mark messages *sent by this engineer* as read by admin
+        if msg.get('engineer_name') == engineer_name and \
+           msg.get('sender_role') == 'engineer' and \
+           not msg.get('read_by_admin', False):
+            msg['read_by_admin'] = True
+            updated = True
+    if updated:
+        save_messages(messages)
+    return updated
+
+def get_unread_engineer_message_count(engineer_name):
+    messages = load_messages()
+    count = 0
+    for msg in messages:
+        if msg.get('engineer_name') == engineer_name and \
+           msg.get('sender_role') == 'admin' and \
+           not msg.get('read_by_engineer', False):
+            count += 1
+    return count
+
+def get_unread_admin_message_counts(): # Ensure this function is defined
+    messages = load_messages()
+    counts = {}
+    for msg in messages:
+        # Count unread messages sent *by engineers*
+        if msg.get('sender_role') == 'engineer' and \
+           not msg.get('read_by_admin', False):
+            eng_name = msg.get('engineer_name')
+            if eng_name:
+                counts[eng_name] = counts.get(eng_name, 0) + 1
+    return counts
+
+# --- END Messaging Helper Functions ---
+
+# --- Messaging API Routes ---
+@app.route('/api/messages/send', methods=['POST'])
+@login_required
+def send_message_api():
+    data = request.get_json()
+    if not data or 'content' not in data:
+        return jsonify({"status": "error", "message": "محتوای پیام الزامی است"}), 400
+
+    content = data['content'].strip()
+    if not content:
+        return jsonify({"status": "error", "message": "محتوای پیام نمی‌تواند خالی باشد"}), 400
+
+    user = session['user']
+    sender_role = user['role']
+    engineer_name = None
+
+    if sender_role == 'engineer':
+        engineer_name = user.get('engineer_name')
+        if not engineer_name:
+             return jsonify({"status": "error", "message": "کاربر مهندس معتبر نیست"}), 403
+    elif sender_role == 'admin':
+        # Admin must specify which engineer they are messaging
+        engineer_name = data.get('engineer_name')
+        if not engineer_name:
+            return jsonify({"status": "error", "message": "نام مهندس برای ارسال پیام توسط ادمین الزامی است"}), 400
+        # Optional: Verify engineer exists
+        engineers = load_engineers()
+        if not any(e['name'] == engineer_name for e in engineers):
+             return jsonify({"status": "error", "message": "مهندس مشخص شده یافت نشد"}), 404
+    else:
+        return jsonify({"status": "error", "message": "نقش کاربر نامعتبر است"}), 403
+
+    try:
+        new_msg = add_message(engineer_name, sender_role, content)
+        # Optionally notify the other party (e.g., using a simple notification system or just rely on polling/refresh)
+        return jsonify({"status": "success", "message": "پیام ارسال شد", "sent_message": new_msg}), 201
+    except Exception as e:
+        print(f"Error sending message: {e}")
+        return jsonify({"status": "error", "message": "خطا در ارسال پیام"}), 500
+
+@app.route('/api/messages/<engineer_name>', methods=['GET'])
+@login_required
+def get_messages_api(engineer_name):
+    user = session['user']
+    # Ensure only the relevant engineer or an admin can access messages
+    if user['role'] == 'engineer' and user.get('engineer_name') != engineer_name:
+        return jsonify({"status": "error", "message": "دسترسی غیرمجاز"}), 403
+    if user['role'] not in ['admin', 'engineer']:
+         return jsonify({"status": "error", "message": "نقش نامعتبر"}), 403
+
+    messages = get_messages_for_engineer(engineer_name)
+    return jsonify({"status": "success", "messages": messages})
+
+@app.route('/api/messages/engineer/markread/<engineer_name>', methods=['POST'])
+@engineer_required
+def mark_engineer_read_api(engineer_name):
+    user = session['user']
+    if user.get('engineer_name') != engineer_name:
+        return jsonify({"status": "error", "message": "دسترسی غیرمجاز"}), 403
+
+    updated = mark_engineer_messages_as_read(engineer_name)
+    return jsonify({"status": "success", "marked_read": updated})
+
+@app.route('/api/messages/admin/markread/<engineer_name>', methods=['POST'])
+@admin_required
+def mark_admin_read_api(engineer_name):
+    # Optional: Check if engineer_name is valid
+    updated = mark_admin_messages_as_read(engineer_name)
+    return jsonify({"status": "success", "marked_read": updated})
+
+# --- END Messaging API Routes ---
 
 if __name__ == '__main__':
     app.run(debug=True, port=8000)

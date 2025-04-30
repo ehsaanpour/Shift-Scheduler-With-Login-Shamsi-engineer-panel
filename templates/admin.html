@@ -4,15 +4,15 @@
 
 {% block content %}
 <div class="container mt-4">
-    <div class="row mb-3">
+    <div class="row mb-3 align-items-center">
         <div class="col-md-8">
-            <h1><i class="fas fa-user-shield me-2"></i>Admin Panel</h1>
-            <p class="lead">Manage users and application settings.</p>
+            <h1><i class="fas fa-user-shield me-2"></i>پنل مدیریت</h1>
+            <p class="lead mb-0">مدیریت کاربران و تنظیمات برنامه.</p>
         </div>
          <div class="col-md-4 text-end">
-            <p>Logged in as: <strong>{{ username }}</strong> (Admin)</p>
-            <a href="{{ url_for('logout') }}" class="btn btn-sm btn-outline-secondary">
-                <i class="fas fa-sign-out-alt me-1"></i> Logout
+             <p class="mb-0"><small>وارد شده با نام: <strong>{{ username }}</strong> (ادمین)</small></p>
+            <a href="{{ url_for('logout') }}" class="btn btn-sm btn-outline-secondary" title="خروج">
+                <i class="fas fa-sign-out-alt"></i>
             </a>
          </div>
     </div>
@@ -23,7 +23,7 @@
             {% for category, message in messages %}
                 <div class="alert alert-{{ category or 'info' }} alert-dismissible fade show" role="alert">
                     {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="بستن"></button>
                 </div>
             {% endfor %}
         {% endif %}
@@ -33,108 +33,159 @@
     {% if error %}
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
         {{ error }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="بستن"></button>
     </div>
     {% endif %}
 
     <div class="row">
         <!-- User Management Section -->
-        <div class="col-md-6 mb-4">
+        <div class="col-md-7 mb-4">
             <div class="card h-100">
                 <div class="card-header">
-                    <h5 class="mb-0"><i class="fas fa-users me-2"></i>User Management</h5>
+                    <h5 class="mb-0"><i class="fas fa-users me-2"></i>مدیریت کاربران</h5>
                 </div>
                 <div class="card-body">
-                    <h6>Existing Users</h6>
-                    <div class="table-responsive mb-4" style="max-height: 250px; overflow-y: auto;">
+                    <h6>کاربران موجود</h6>
+                    <div class="table-responsive mb-4" style="max-height: 300px; overflow-y: auto;">
                         <table class="table table-sm table-striped">
                             <thead>
                                 <tr>
-                                    <th>Username</th>
-                                    <th>Role</th>
-                                    <th>Linked Engineer</th>
-                                    <th>Action</th>
+                                    <th>نام کاربری</th>
+                                    <th>نقش</th>
+                                    <th>مهندس مرتبط</th>
+                                    <th>عملیات</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="userListBody">
                                 {% for user in users %}
-                                <tr>
+                                <tr data-username="{{ user.username }}">
                                     <td>{{ user.username }}</td>
-                                    <td><span class="badge bg-{{ 'primary' if user.role == 'admin' else 'secondary' }}">{{ user.role|capitalize }}</span></td>
-                                    <td>{{ user.engineer_name if user.engineer_name else '-' }}</td>
+                                    <td><span class="badge bg-{{ 'primary' if user.role == 'admin' else 'info' }}">{{ user.role|capitalize }}</span></td>
                                     <td>
+                                        {% if user.engineer_name %}
+                                            {{ user.engineer_name }}
+                                            {% if not user.engineer_exists %}<i class="fas fa-exclamation-triangle text-warning ms-1" title="پروفایل مهندس یافت نشد"></i>{% endif %}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if user.role == 'engineer' and user.engineer_name %}
+                                        <button class="btn btn-xs btn-outline-secondary view-messages-btn me-1" 
+                                                data-engineer-name="{{ user.engineer_name }}" 
+                                                data-bs-toggle="modal" data-bs-target="#adminMessagesModal" 
+                                                title="مشاهده پیام‌های {{ user.engineer_name }}">
+                                            <i class="fas fa-envelope"></i>
+                                            {% if user.unread_message_count > 0 %}
+                                            <span class="badge bg-danger ms-1 admin-badge-{{ user.engineer_name|replace(' ', '-') }}">{{ user.unread_message_count }}</span>
+                                            {% else %}
+                                            <span class="badge bg-danger ms-1 admin-badge-{{ user.engineer_name|replace(' ', '-') }} d-none">0</span>
+                                            {% endif %}
+                                        </button>
+                                        {% endif %}
+                                        
                                         {% if user.username != session['user']['username'] %}
-                                        <button class="btn btn-xs btn-outline-danger delete-user-btn" data-username="{{ user.username }}">
+                                        <button class="btn btn-xs btn-outline-danger delete-user-btn" data-username="{{ user.username }}" title="حذف کاربر">
                                             <i class="fas fa-trash-alt"></i>
                                         </button>
                                         {% else %}
-                                        <span class="text-muted small">(You)</span>
+                                        <span class="text-muted small">(شما)</span>
                                         {% endif %}
                                     </td>
                                 </tr>
                                 {% else %}
                                 <tr>
-                                    <td colspan="4" class="text-center text-muted">No users found.</td>
+                                    <td colspan="4" class="text-center text-muted">کاربری یافت نشد.</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
                         </table>
                     </div>
 
-                    <hr>
-
-                    <h6>Create New User</h6>
-                    <form action="{{ url_for('add_user') }}" method="POST">
-                        <div class="mb-3">
-                            <label for="username" class="form-label">Username</label>
-                            <input type="text" class="form-control form-control-sm" id="username" name="username" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Password</label>
-                            <input type="password" class="form-control form-control-sm" id="password" name="password" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="role" class="form-label">Role</label>
-                            <select class="form-select form-select-sm" id="role" name="role" onchange="toggleEngineerSelect(this.value)">
-                                <option value="engineer" selected>Engineer</option>
-                                <option value="admin">Admin</option>
-                            </select>
-                        </div>
-                        <div class="mb-3" id="engineerSelectDiv">
-                            <label for="engineer_name" class="form-label">Link to Engineer Profile</label>
-                            <select class="form-select form-select-sm" id="engineer_name" name="engineer_name">
-                                <option value="" disabled selected>-- Select Engineer --</option>
-                                {% for eng in available_engineers %}
-                                <option value="{{ eng.name }}">{{ eng.name }}</option>
-                                {% else %}
-                                 <option value="" disabled>No unlinked engineers available</option>
-                                {% endfor %}
-                            </select>
-                             <small class="form-text text-muted">
-                                 Only engineers without an existing user account are shown.
-                             </small>
-                        </div>
-                        <button type="submit" class="btn btn-primary btn-sm">
-                            <i class="fas fa-plus me-1"></i> Create User
-                        </button>
-                    </form>
                 </div>
             </div>
         </div>
 
-        <!-- Placeholder for other admin settings if needed -->
-        <div class="col-md-6 mb-4">
-            <div class="card h-100">
-                <div class="card-header">
-                     <h5 class="mb-0"><i class="fas fa-cogs me-2"></i>Other Settings</h5>
-                </div>
-                 <div class="card-body text-center text-muted">
-                    <p>Other administrative settings can go here.</p>
+        <!-- Create User Section -->
+        <div class="col-md-5 mb-4">
+             <div class="card h-100">
+                 <div class="card-header">
+                     <h5 class="mb-0"><i class="fas fa-user-plus me-2"></i>ایجاد کاربر جدید</h5>
+                 </div>
+                 <div class="card-body">
+                    <form action="{{ url_for('add_user') }}" method="POST">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">نام کاربری</label>
+                            <input type="text" class="form-control form-control-sm" id="username" name="username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">رمز عبور</label>
+                            <input type="password" class="form-control form-control-sm" id="password" name="password" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="role" class="form-label">نقش</label>
+                            <select class="form-select form-select-sm" id="role" name="role" onchange="toggleEngineerSelect(this.value)">
+                                <option value="engineer" selected>مهندس</option>
+                                <option value="admin">ادمین</option>
+                            </select>
+                        </div>
+                        <div class="mb-3" id="engineerSelectDiv">
+                            <label for="engineer_name" class="form-label">اتصال به پروفایل مهندس</label>
+                            <select class="form-select form-select-sm" id="engineer_name" name="engineer_name">
+                                <option value="" disabled selected>-- انتخاب مهندس --</option>
+                                {% for eng in engineers %}
+                                    {% set is_linked = eng.name in users|map(attribute='engineer_name') %}
+                                    <option value="{{ eng.name }}" {% if is_linked %}disabled{% endif %}>{{ eng.name }} {% if is_linked %}(متصل شده){% endif %}</option>
+                                {% else %}
+                                 <option value="" disabled>مهندسی یافت نشد</option>
+                                {% endfor %}
+                            </select>
+                             <small class="form-text text-muted">
+                                 فقط مهندسانی که حساب کاربری ندارند قابل انتخاب هستند.
+                             </small>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus me-1"></i> ایجاد کاربر
+                        </button>
+                    </form>
                  </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Admin Messages Modal -->
+<div class="modal fade" id="adminMessagesModal" tabindex="-1" aria-labelledby="adminMessagesModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="adminMessagesModalLabel"><i class="fas fa-comments me-2"></i>پیام‌ها با <span id="modalEngineerName"></span></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="بستن"></button>
+      </div>
+      <div class="modal-body">
+        <div id="adminMessageThread" style="max-height: 50vh; overflow-y: auto; margin-bottom: 1rem; border-bottom: 1px solid #eee; padding-bottom: 1rem;">
+           <!-- Messages loaded here -->
+           <p class="text-center text-muted">در حال بارگذاری پیام‌ها...</p>
+        </div>
+        <h6>ارسال پاسخ:</h6>
+        <div id="adminReplyFeedback" class="mb-2"></div>
+        <form id="adminReplyForm">
+             <input type="hidden" id="modalTargetEngineerName" value="">
+             <div class="mb-2">
+                 <textarea id="adminReplyText" class="form-control" rows="3" required placeholder="پاسخ خود را اینجا بنویسید..."></textarea>
+             </div>
+             <button type="submit" id="btnSendAdminReply" class="btn btn-primary btn-sm">
+                 <i class="fas fa-paper-plane me-1"></i> ارسال پاسخ
+             </button>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">بستن</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 {% endblock %}
 
 {% block extra_js %}
@@ -183,6 +234,159 @@
                 }
             });
         });
+
+        // --- Admin Messaging Logic ---
+        const userListBody = document.getElementById('userListBody');
+        const adminMessagesModal = document.getElementById('adminMessagesModal');
+        const adminMessageThread = document.getElementById('adminMessageThread');
+        const modalEngineerNameSpan = document.getElementById('modalEngineerName');
+        const adminReplyForm = document.getElementById('adminReplyForm');
+        const adminReplyText = document.getElementById('adminReplyText');
+        const btnSendAdminReply = document.getElementById('btnSendAdminReply');
+        const adminReplyFeedback = document.getElementById('adminReplyFeedback');
+        const modalTargetEngineerNameInput = document.getElementById('modalTargetEngineerName');
+
+        if (userListBody) {
+            userListBody.addEventListener('click', (e) => {
+                const targetButton = e.target.closest('.view-messages-btn');
+                if (targetButton) {
+                    const engineerName = targetButton.dataset.engineerName;
+                    if (!engineerName) return;
+
+                    // Store engineer name and update modal title
+                    modalTargetEngineerNameInput.value = engineerName;
+                    modalEngineerNameSpan.textContent = engineerName;
+                    adminReplyText.value = ''; // Clear reply area
+                    adminReplyFeedback.textContent = ''; // Clear feedback
+                    adminReplyFeedback.className = 'mb-2'; 
+
+                    // Load messages
+                    loadAdminMessages(engineerName);
+
+                    // Mark as read
+                    fetch(`/api/messages/admin/markread/${engineerName}`, { method: 'POST' })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status === 'success' && data.marked_read) {
+                                // Hide badge for this engineer
+                                const badge = targetButton.querySelector('.badge');
+                                if (badge) {
+                                    badge.classList.add('d-none');
+                                    badge.textContent = '0';
+                                }
+                                console.log(`Marked messages from ${engineerName} as read by admin`);
+                            }
+                        })
+                        .catch(error => console.error('Error marking admin messages read:', error));
+                }
+            });
+        }
+
+        if (adminReplyForm) {
+            adminReplyForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const content = adminReplyText.value.trim();
+                const targetEngineerName = modalTargetEngineerNameInput.value; 
+                if (!content || !targetEngineerName) return;
+
+                btnSendAdminReply.disabled = true;
+                btnSendAdminReply.innerHTML = '<span class="spinner-border spinner-border-sm"></span>...';
+                adminReplyFeedback.textContent = '';
+                adminReplyFeedback.className = 'mb-2';
+
+                fetch('/api/messages/send', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        content: content,
+                        engineer_name: targetEngineerName // Specify engineer when sending as admin
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        adminReplyText.value = ''; // Clear textarea
+                        adminReplyFeedback.textContent = 'پاسخ ارسال شد!';
+                        adminReplyFeedback.classList.add('text-success', 'small');
+                        // Reload messages in the modal to show the reply
+                        loadAdminMessages(targetEngineerName);
+                    } else {
+                        throw new Error(data.message || 'خطا در ارسال پاسخ');
+                    }
+                })
+                .catch(error => {
+                    adminReplyFeedback.textContent = `خطا: ${error.message}`;
+                    adminReplyFeedback.classList.add('text-danger', 'small');
+                    console.error("Error sending admin reply:", error);
+                })
+                .finally(() => {
+                    btnSendAdminReply.disabled = false;
+                    btnSendAdminReply.innerHTML = '<i class="fas fa-paper-plane me-1"></i> ارسال پاسخ';
+                     // Clear feedback after a few seconds
+                    setTimeout(() => { adminReplyFeedback.textContent = ''; adminReplyFeedback.className = 'mb-2'; }, 5000);
+                });
+            });
+        }
+
+        // Function to load and display messages in the ADMIN modal
+        function loadAdminMessages(engineerName) {
+            if (!adminMessageThread || !engineerName) return;
+
+            adminMessageThread.innerHTML = '<p class="text-center text-muted">در حال بارگذاری پیام‌ها...</p>';
+
+            fetch(`/api/messages/${engineerName}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success' && Array.isArray(data.messages)) {
+                        adminMessageThread.innerHTML = ''; // Clear
+                        if (data.messages.length === 0) {
+                            adminMessageThread.innerHTML = '<p class="text-center text-muted">هنوز پیامی وجود ندارد.</p>';
+                            return;
+                        }
+
+                        data.messages.forEach(msg => {
+                            const msgDiv = document.createElement('div');
+                            const isAdminSender = msg.sender_role === 'admin';
+                            const timestamp = new Date(msg.timestamp).toLocaleString('fa-IR', { dateStyle: 'short', timeStyle: 'short' });
+
+                            msgDiv.classList.add('mb-3', 'p-2', 'rounded');
+                            msgDiv.style.maxWidth = '80%';
+
+                            if (isAdminSender) {
+                                msgDiv.classList.add('bg-primary', 'text-white'); // Admin message align left
+                                msgDiv.style.textAlign = 'left';
+                            } else {
+                                msgDiv.classList.add('bg-light', 'ms-auto'); // Engineer message align right
+                                msgDiv.style.textAlign = 'right';
+                            }
+
+                            msgDiv.innerHTML = `
+                                <p class="mb-1">${escapeHTML(msg.content)}</p>
+                                <small class="text-muted ${isAdminSender ? 'text-white-50' : ''}" style="font-size: 0.75em;">
+                                    ${isAdminSender ? 'شما (ادمین)' : engineerName} - ${timestamp}
+                                </small>
+                            `;
+                            adminMessageThread.appendChild(msgDiv);
+                        });
+                        // Scroll to bottom
+                        adminMessageThread.scrollTop = adminMessageThread.scrollHeight;
+                    } else {
+                        throw new Error(data.message || 'Failed to load messages');
+                    }
+                })
+                .catch(error => {
+                    adminMessageThread.innerHTML = `<p class="text-center text-danger">خطا در بارگذاری پیام‌ها: ${error.message}</p>`;
+                    console.error('Error loading admin messages:', error);
+                });
+        }
+        
+        // Re-use escapeHTML function (consider moving to a shared JS file if needed)
+        function escapeHTML(str) {
+            const div = document.createElement('div');
+            div.appendChild(document.createTextNode(str));
+            return div.innerHTML;
+        }
+        // --- END Admin Messaging Logic ---
     });
 </script>
 {% endblock %} 

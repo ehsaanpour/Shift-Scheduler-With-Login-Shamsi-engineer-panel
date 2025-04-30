@@ -5,7 +5,39 @@
       "Studio Hispan",
       "Studio Press"
     ],
-    "limitations": {},
+    "limitations": {
+      "1": [
+        "shift2"
+      ],
+      "2": [
+        "shift2"
+      ],
+      "3": [
+        "shift2"
+      ],
+      "4": [
+        "shift2"
+      ],
+      "5": [
+        "shift2"
+      ],
+      "6": [
+        "shift2",
+        "shift3"
+      ],
+      "7": [
+        "shift3"
+      ],
+      "12": [
+        "shift1"
+      ],
+      "13": [
+        "shift1"
+      ],
+      "14": [
+        "shift1"
+      ]
+    },
     "minShifts": 10,
     "maxShifts": 30
   },
