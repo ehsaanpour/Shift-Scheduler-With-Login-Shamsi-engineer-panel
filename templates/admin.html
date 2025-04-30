@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Panel{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-3">
+        <div class="col-md-8">
+            <h1><i class="fas fa-user-shield me-2"></i>Admin Panel</h1>
+            <p class="lead">Manage users and application settings.</p>
+        </div>
+         <div class="col-md-4 text-end">
+            <p>Logged in as: <strong>{{ username }}</strong> (Admin)</p>
+            <a href="{{ url_for('logout') }}" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-sign-out-alt me-1"></i> Logout
+            </a>
+         </div>
+    </div>
+
+    <!-- Display flashed messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category or 'info' }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+    <!-- Display general errors passed from route -->
+    {% if error %}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        {{ error }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
+
+    <div class="row">
+        <!-- User Management Section -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-users me-2"></i>User Management</h5>
+                </div>
+                <div class="card-body">
+                    <h6>Existing Users</h6>
+                    <div class="table-responsive mb-4" style="max-height: 250px; overflow-y: auto;">
+                        <table class="table table-sm table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Role</th>
+                                    <th>Linked Engineer</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in users %}
+                                <tr>
+                                    <td>{{ user.username }}</td>
+                                    <td><span class="badge bg-{{ 'primary' if user.role == 'admin' else 'secondary' }}">{{ user.role|capitalize }}</span></td>
+                                    <td>{{ user.engineer_name if user.engineer_name else '-' }}</td>
+                                    <td>
+                                        {% if user.username != session['user']['username'] %}
+                                        <button class="btn btn-xs btn-outline-danger delete-user-btn" data-username="{{ user.username }}">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                        {% else %}
+                                        <span class="text-muted small">(You)</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted">No users found.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <hr>
+
+                    <h6>Create New User</h6>
+                    <form action="{{ url_for('add_user') }}" method="POST">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" class="form-control form-control-sm" id="username" name="username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control form-control-sm" id="password" name="password" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="role" class="form-label">Role</label>
+                            <select class="form-select form-select-sm" id="role" name="role" onchange="toggleEngineerSelect(this.value)">
+                                <option value="engineer" selected>Engineer</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                        </div>
+                        <div class="mb-3" id="engineerSelectDiv">
+                            <label for="engineer_name" class="form-label">Link to Engineer Profile</label>
+                            <select class="form-select form-select-sm" id="engineer_name" name="engineer_name">
+                                <option value="" disabled selected>-- Select Engineer --</option>
+                                {% for eng in available_engineers %}
+                                <option value="{{ eng.name }}">{{ eng.name }}</option>
+                                {% else %}
+                                 <option value="" disabled>No unlinked engineers available</option>
+                                {% endfor %}
+                            </select>
+                             <small class="form-text text-muted">
+                                 Only engineers without an existing user account are shown.
+                             </small>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus me-1"></i> Create User
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Placeholder for other admin settings if needed -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                     <h5 class="mb-0"><i class="fas fa-cogs me-2"></i>Other Settings</h5>
+                </div>
+                 <div class="card-body text-center text-muted">
+                    <p>Other administrative settings can go here.</p>
+                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function toggleEngineerSelect(role) {
+        const engineerSelectDiv = document.getElementById('engineerSelectDiv');
+        const engineerSelect = document.getElementById('engineer_name');
+        if (role === 'engineer') {
+            engineerSelectDiv.style.display = 'block';
+            engineerSelect.required = true;
+        } else {
+            engineerSelectDiv.style.display = 'none';
+            engineerSelect.required = false;
+            engineerSelect.value = ""; // Clear selection
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // Initial state based on default role selection
+        toggleEngineerSelect(document.getElementById('role').value);
+        
+        // Add event listeners for delete buttons
+        document.querySelectorAll('.delete-user-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const username = this.dataset.username;
+                if (confirm(`Are you sure you want to delete user '${username}'? This cannot be undone.`)) {
+                    fetch(`/admin/users/${username}`, {
+                        method: 'DELETE',
+                        headers: {
+                            // Add CSRF token header if needed
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            alert(data.message || 'User deleted successfully.');
+                            window.location.reload(); // Reload page to reflect changes
+                        } else {
+                            alert(`Error: ${data.error || 'Could not delete user.'}`);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error deleting user:', error);
+                        alert('An error occurred while trying to delete the user.');
+                    });
+                }
+            });
+        });
+    });
+</script>
+{% endblock %} 

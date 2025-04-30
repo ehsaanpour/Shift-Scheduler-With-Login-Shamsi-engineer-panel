@@ -1,0 +1,14 @@
+[
+  {
+    "username": "admin",
+    "password_hash": "240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9",
+    "role": "admin",
+    "engineer_name": null
+  },
+  {
+    "username": "beshk",
+    "password_hash": "01bca66930a306e87ba4f24cc5e009d88f269de83a9aee0554e03eef0731bb98",
+    "role": "engineer",
+    "engineer_name": "\u0628\u0634\u06a9"
+  }
+]
