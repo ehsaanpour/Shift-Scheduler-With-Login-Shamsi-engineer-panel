@@ -1,7 +1,7 @@
 [
   {
     "username": "admin",
-    "password_hash": "240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9",
+    "password_hash": "6826da84aadaf91b8955cb21343ae9284a2f5aa02f6a22079713e718d1554b30",
     "role": "admin",
     "engineer_name": null
   },
@@ -16,5 +16,11 @@
     "password_hash": "c37ec56eea5fc44dddcd68aa5d85a6aaa72a224f007c3ccc5c84d72fe90feca0",
     "role": "engineer",
     "engineer_name": "\u0634\u0631\u06cc\u0641\u06cc"
+  },
+  {
+    "username": "ehsaanpour",
+    "password_hash": "da025477fa9a6b49e945a1d0ee10965d2c17e361342cdc3706a166109fa818cc",
+    "role": "admin",
+    "engineer_name": null
   }
 ]

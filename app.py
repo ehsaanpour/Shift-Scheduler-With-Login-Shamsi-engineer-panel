@@ -20,7 +20,7 @@ app = Flask(__name__, template_folder='templates', static_folder='static')
 # IMPORTANT: Set a fixed secret key. 
 # For production, use an environment variable: app.secret_key = os.environ.get('SECRET_KEY')
 # For development, you can use a hardcoded string (change this!):
-app.secret_key = 'your-super-secret-and-long-random-string-here' 
+app.secret_key = '940e26b1bfcbe2c0111ce0aaf3230d43' # Set a persistent secret key
 # app.secret_key = secrets.token_hex(16)  # Commented out random generation
 
 # Set up logging
@@ -219,6 +219,7 @@ def save_schedules(schedules):
 def login_required(f):
     @wraps(f) # Use wraps
     def decorated_function(*args, **kwargs):
+        logging.info(f"LOGIN_REQUIRED decorator for {f.__name__}: Checking session. Session data: {session}") # Added log
         if 'user' not in session:
             flash('لطفا برای دسترسی به این صفحه وارد شوید.', 'warning') # Translated
             return redirect(url_for('login_page'))
@@ -306,6 +307,7 @@ def login_page():
             "role": user["role"],
             "engineer_name": user.get("engineer_name") # Use .get for safety
         }
+        logging.info(f"LOGIN_SUCCESS: Session set for user {user['username']}. Session data: {session}") # Added log
         
         # --- Redirect based on role ---
         if user["role"] == "admin":
