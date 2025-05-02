@@ -19,6 +19,12 @@ console.log("DEBUG: Initial persianMonthNamesJS (global):", typeof persianMonthN
 console.log("DEBUG: Initial initialJalaliYear (global):", typeof initialJalaliYear, initialJalaliYear);
 console.log("DEBUG: Initial initialJalaliMonth (global):", typeof initialJalaliMonth, initialJalaliMonth);
 
+// Helper function to convert English digits to Persian digits
+const toPersianDigits = (num) => {
+    const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+    return String(num).replace(/[0-9]/g, (digit) => persianDigits[parseInt(digit)]);
+};
+
 document.addEventListener('DOMContentLoaded', () => {
     // Get references to elements
     const monthSelect = document.getElementById('monthSelect');
@@ -173,9 +179,10 @@ function generateLimitationsCalendar() {
         // Day cell
         const dayCell = document.createElement('td');
         dayCell.className = 'fw-bold';
-        // Use the globally defined persianMonthNamesJS
-        const dayName = (typeof persianMonthNamesJS !== 'undefined' && persianMonthNamesJS[dayOfWeek]) ? persianMonthNamesJS[dayOfWeek] : ''
-        dayCell.textContent = `${day} (${dayName})`; 
+        // Use the globally defined persianDayNamesJSGlobal for day names
+        const dayName = (typeof persianDayNamesJSGlobal !== 'undefined' && persianDayNamesJSGlobal[dayOfWeek]) ? persianDayNamesJSGlobal[dayOfWeek] : '';
+        // Convert day number to Persian digits
+        dayCell.textContent = `${toPersianDigits(day)} (${dayName})`;
         row.appendChild(dayCell);
 
         // Shift limitation checkboxes

@@ -36,6 +36,11 @@
       ],
       "14": [
         "shift1"
+      ],
+      "31": [
+        "shift1",
+        "shift2",
+        "shift3"
       ]
     },
     "minShifts": 10,

@@ -971,7 +971,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Day column with Persian day name
                 const dayCell = document.createElement('td');
                 const persianDayIndex = (currentDayOfWeekGreg + 1) % 7; // 0=Sat, ..., 6=Fri
-                dayCell.textContent = `${day} (${PERSIAN_DAY_NAMES[persianDayIndex]})`;
+                const dayName = PERSIAN_DAY_NAMES[persianDayIndex];
+                // Convert day number to Persian digits
+                dayCell.innerHTML = `<strong>${toPersianDigits(day)}</strong><br><small>${dayName}</small>`;
                 dayCell.className = 'fw-bold';
                 row.appendChild(dayCell);
                 
@@ -1302,7 +1304,9 @@ document.addEventListener('DOMContentLoaded', function() {
             // Day cell with Persian day name
             const dayCell = document.createElement('td');
             const persianDayIndex = (currentDayOfWeekGreg + 1) % 7; // 0=Sat, ..., 6=Fri
-            dayCell.textContent = `${day} (${PERSIAN_DAY_NAMES[persianDayIndex]})`;
+            const dayName = PERSIAN_DAY_NAMES[persianDayIndex];
+            // Convert day number to Persian digits
+            dayCell.textContent = `${toPersianDigits(day)} (${dayName})`;
             row.appendChild(dayCell);
             
             // Shift checkboxes
@@ -1616,6 +1620,12 @@ document.addEventListener('DOMContentLoaded', function() {
             alert(`[${type.toUpperCase()}] ${message}`);
         }
     }
+
+    // Helper function to convert English digits to Persian digits
+    const toPersianDigits = (num) => {
+        const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+        return String(num).replace(/[0-9]/g, (digit) => persianDigits[parseInt(digit)]);
+    };
 
 });
 </script>
