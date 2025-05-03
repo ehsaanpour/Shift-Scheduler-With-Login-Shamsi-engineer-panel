@@ -7,5 +7,14 @@
     "content": "سلام منو بیشتر شیفت شب بذارید",
     "read_by_engineer": true,
     "read_by_admin": true
+  },
+  {
+    "message_id": "a06d1412-5983-458a-9bd3-12e8aa8008f7",
+    "engineer_name": "بشک",
+    "sender_role": "engineer",
+    "timestamp": "2025-05-03T14:51:15.923773+00:00",
+    "content": "لطفا شیفت های خرداد من رو نودال ننویسید",
+    "read_by_engineer": true,
+    "read_by_admin": false
   }
 ]

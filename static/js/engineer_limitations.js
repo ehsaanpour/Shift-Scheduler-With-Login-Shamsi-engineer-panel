@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const monthSelect = document.getElementById('monthSelect');
     const yearSelect = document.getElementById('yearSelect');
     const calendarContainer = document.getElementById('limitationsCalendar');
-    const saveButton = document.getElementById('btnSaveLimitations');
+    const btnSaveLimitations = document.getElementById('btnSaveLimitations');
     const sendMessageForm = document.getElementById('sendMessageForm');
     const messageContent = document.getElementById('messageContent');
     const btnSendMessage = document.getElementById('btnSendMessage');
@@ -41,6 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const engineerMessageBadge = document.getElementById('engineerMessageBadge');
     const engineerName = (typeof engineerData !== 'undefined' && engineerData) ? engineerData.name : null;
     console.log("DEBUG: Engineer name for listeners:", engineerName);
+    const btnDownloadPdf = document.getElementById('btnDownloadPdf');
 
     // Initial calendar generation
     if (typeof generateLimitationsCalendar === 'function') {
@@ -61,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Event listeners
     monthSelect.addEventListener('change', generateLimitationsCalendar);
     yearSelect.addEventListener('change', generateLimitationsCalendar);
-    saveButton.addEventListener('click', saveLimitations);
+    btnSaveLimitations.addEventListener('click', saveLimitations);
 
     // --- Messaging Event Listeners ---
     if (sendMessageForm && engineerName) {
@@ -124,6 +125,48 @@ document.addEventListener('DOMContentLoaded', () => {
                 })
                 .catch(error => console.error('Error marking messages as read:', error));
         });
+    }
+
+    // Function to download the page content as PDF
+    function downloadLimitationsAsPDF() {
+        const { jsPDF } = window.jspdf;
+        const elementToCapture = document.querySelector('.engineer-dashboard');
+        const filename = 'دانلود محدودیت ها.pdf';
+
+        // Temporarily hide buttons to avoid them appearing in the PDF
+        btnSaveLimitations.style.display = 'none';
+        btnDownloadPdf.style.display = 'none';
+
+        html2canvas(elementToCapture, {
+             scale: 2,
+             useCORS: true,
+             logging: false
+        }).then(canvas => {
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF({
+                orientation: 'p',
+                unit: 'px',
+                format: [canvas.width, canvas.height]
+            });
+            pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+            pdf.save(filename);
+
+            // Show buttons again after capturing
+            btnSaveLimitations.style.display = 'inline-block';
+            btnDownloadPdf.style.display = 'inline-block';
+
+        }).catch(err => {
+            console.error("Error generating PDF:", err);
+            alert('خطا در تولید فایل PDF. لطفا دوباره تلاش کنید.');
+            // Ensure buttons are shown even if there's an error
+            btnSaveLimitations.style.display = 'inline-block';
+            btnDownloadPdf.style.display = 'inline-block';
+        });
+    }
+
+    // Add event listener for the PDF download button
+    if (btnDownloadPdf) {
+        btnDownloadPdf.addEventListener('click', downloadLimitationsAsPDF);
     }
 });
 
@@ -237,7 +280,7 @@ function generateLimitationsCalendar() {
 function saveLimitations() {
     const monthSelect = document.getElementById('monthSelect');
     const yearSelect = document.getElementById('yearSelect');
-    const saveButton = document.getElementById('btnSaveLimitations');
+    const btnSaveLimitations = document.getElementById('btnSaveLimitations');
 
     const month = parseInt(monthSelect.value);
     const year = parseInt(yearSelect.value);
@@ -257,9 +300,9 @@ function saveLimitations() {
     console.log(`Saving limitations for ${year}-${month}:`, limitationsForMonth);
 
     // Disable button and show loading state
-    const originalBtnText = saveButton.innerHTML;
-    saveButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> در حال ذخیره...';
-    saveButton.disabled = true;
+    const originalBtnText = btnSaveLimitations.innerHTML;
+    btnSaveLimitations.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> در حال ذخیره...';
+    btnSaveLimitations.disabled = true;
 
     // Send data to API
     fetch('/api/engineer/limitations', {
@@ -302,14 +345,14 @@ function saveLimitations() {
         const feedback = document.createElement('span');
         feedback.className = 'ms-2 text-danger small';
         feedback.textContent = `خطا: ${error.message}`;
-        saveButton.parentNode.insertBefore(feedback, saveButton.nextSibling);
+        btnSaveLimitations.parentNode.insertBefore(feedback, btnSaveLimitations.nextSibling);
         setTimeout(() => feedback.remove(), 5000);
         // alert(`ذخیره محدودیت‌ها ناموفق بود: ${error.message}`);
     })
     .finally(() => {
         // Restore button state
-        saveButton.innerHTML = originalBtnText;
-        saveButton.disabled = false;
+        btnSaveLimitations.innerHTML = originalBtnText;
+        btnSaveLimitations.disabled = false;
     });
 }
 
