@@ -6,37 +6,33 @@
       "Studio Press"
     ],
     "limitations": {
-      "1": [
-        "shift2"
-      ],
-      "2": [
-        "shift2"
-      ],
-      "3": [
-        "shift2"
-      ],
-      "4": [
-        "shift2"
-      ],
-      "5": [
-        "shift2"
-      ],
-      "6": [
-        "shift2",
-        "shift3"
-      ],
-      "7": [
-        "shift3"
-      ],
-      "12": [
-        "shift1"
-      ],
-      "13": [
-        "shift1"
-      ],
-      "14": [
-        "shift1"
-      ]
+      "1404": {
+        "2": {
+          "8": [
+            "shift3"
+          ],
+          "9": [
+            "shift3"
+          ],
+          "10": [
+            "shift3"
+          ],
+          "11": [
+            "shift3"
+          ]
+        },
+        "3": {
+          "10": [
+            "shift3"
+          ],
+          "11": [
+            "shift3"
+          ],
+          "12": [
+            "shift3"
+          ]
+        }
+      }
     },
     "minShifts": 10,
     "maxShifts": 30
@@ -69,18 +65,7 @@
       "Studio Press",
       "Nodal"
     ],
-    "limitations": {
-      "9": [
-        "shift1",
-        "shift2",
-        "shift3"
-      ],
-      "10": [
-        "shift1",
-        "shift2",
-        "shift3"
-      ]
-    },
+    "limitations": {},
     "minShifts": 10,
     "maxShifts": 30
   },
@@ -133,18 +118,7 @@
     "workplaces": [
       "Engineer Room"
     ],
-    "limitations": {
-      "1": [
-        "shift1",
-        "shift2",
-        "shift3"
-      ],
-      "2": [
-        "shift1",
-        "shift2",
-        "shift3"
-      ]
-    },
+    "limitations": {},
     "minShifts": 10,
     "maxShifts": 60
   },

@@ -386,6 +386,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentSchedule = {};
     let currentEngineerForLimitations = null;
     let currentEngineerForShiftLimits = null;
+    let engineerLimitations = {}; // NEW: Store limitations keyed by engineer name, then year, then month
     
     // Define Persian calendar constants
     const PERSIAN_MONTH_NAMES = [
@@ -660,6 +661,42 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(response => response.json())
             .then(data => {
                 engineers = data;
+                // NEW: Populate engineerLimitations from fetched data
+                console.log("LOAD_ENGINEERS: Received raw data:", JSON.stringify(data)); // Log raw data
+                engineerLimitations = {}; // Clear previous
+                engineers.forEach(eng => {
+                    // Ensure limitations is an object, default to empty if null/undefined
+                    const rawLimits = eng.limitations;
+                    console.log(`LOAD_ENGINEERS: Processing engineer ${eng.name}, raw limitations:`, JSON.stringify(rawLimits)); // Log raw limits per engineer
+                    
+                    if (rawLimits && typeof rawLimits === 'object') {
+                         // Check if it already has the nested structure (e.g., contains year keys)
+                         const years = Object.keys(rawLimits);
+                         const looksNested = years.length > 0 && /^[0-9]{4}$/.test(years[0]); // Basic check if keys look like years
+                         
+                         if (looksNested) {
+                            console.log(`LOAD_ENGINEERS: Limitations for ${eng.name} appear nested. Assigning directly.`);
+                            engineerLimitations[eng.name] = rawLimits;
+                         } else {
+                            // Attempt to handle potentially flat structure (migration or error case)
+                            // This part might need adjustment depending on how flat data could look
+                            console.warn(`LOAD_ENGINEERS: Limitations for ${eng.name} do NOT look nested. Treating as potentially flat or invalid. Initializing empty for safety.`);
+                            // Decide how to handle non-nested data. For now, treat as empty to avoid errors.
+                            // If migration from a flat structure is needed, logic would go here.
+                            engineerLimitations[eng.name] = {}; 
+                         }
+                    } else {
+                        console.log(`LOAD_ENGINEERS: No valid limitations object found for ${eng.name}. Initializing empty.`);
+                        engineerLimitations[eng.name] = {}; // Initialize empty if no limits or wrong type
+                    }
+                    
+                    // Log the result AFTER processing
+                    console.log(`LOAD_ENGINEERS: Stored limitations for ${eng.name}:`, JSON.stringify(engineerLimitations[eng.name]));
+                    
+                    // This line might be unnecessary now, as other functions use engineerLimitations directly.
+                    // Let's comment it out to see if it causes issues elsewhere.
+                    // eng.limitations = engineerLimitations[eng.name]; 
+                });
                 updateEngineersList();
                 
                 // --- DEBUGGING START ---
@@ -744,19 +781,32 @@ document.addEventListener('DOMContentLoaded', function() {
             workplaces.classList.add('text-muted');
             workplaces.textContent = `محل‌های کار: ${eng.workplaces.join(', ')}`;
             
-            // Add limitations info if any
-            const limitCount = eng.limitations ? Object.keys(eng.limitations).reduce((count, day) => {
-                return count + (Array.isArray(eng.limitations[day]) ? eng.limitations[day].length : 0);
-            }, 0) : 0;
-            
-            if (limitCount > 0) {
-                const limitations = document.createElement('small');
-                limitations.classList.add('text-danger', 'd-block', 'mt-1');
-                limitations.innerHTML = `<i class="fas fa-exclamation-circle me-1"></i>دارای ${limitCount} محدودیت شیفت`;
-            
+            // Add limitations info if any - CHECK THE NESTED STRUCTURE
+            // Correctly calculate total limitations across all years/months stored
+            let totalLimitCount = 0;
+            const engLims = engineerLimitations[eng.name] || {}; // Use the centrally stored limits
+            for (const year in engLims) {
+                if (Object.hasOwnProperty.call(engLims, year)) {
+                    const yearLims = engLims[year];
+                    for (const month in yearLims) {
+                        if (Object.hasOwnProperty.call(yearLims, month)) {
+                            const monthLims = yearLims[month];
+                            totalLimitCount += Object.keys(monthLims).reduce((count, day) => {
+                                return count + (Array.isArray(monthLims[day]) ? monthLims[day].length : 0);
+                            }, 0);
+                        }
+                    }
+                }
+            }
+
+            if (totalLimitCount > 0) {
+                const limitationsElement = document.createElement('small'); // Renamed variable to avoid conflict
+                limitationsElement.classList.add('text-danger', 'd-block', 'mt-1');
+                limitationsElement.innerHTML = `<i class="fas fa-exclamation-circle me-1"></i>دارای ${totalLimitCount} محدودیت شیفت`;
+
                 cardBody.appendChild(nameRow);
                 cardBody.appendChild(workplaces);
-                cardBody.appendChild(limitations);
+                cardBody.appendChild(limitationsElement); // Use the new variable name
             } else {
                 cardBody.appendChild(nameRow);
                 cardBody.appendChild(workplaces);
@@ -1231,8 +1281,8 @@ document.addEventListener('DOMContentLoaded', function() {
     function showLimitationsModal(engineer) {
         currentEngineerForLimitations = engineer;
         
-        // Debug the current limitations
-        console.log('Inline Script: Engineer limitations before editing:', JSON.stringify(engineer.limitations || {}));
+        // Debug the current limitations structure for this engineer
+        console.log(`Inline Script: Limitations for ${engineer.name} before editing:`, JSON.stringify(engineerLimitations[engineer.name] || {}));
         
         // Set the modal dropdowns to match the main page selections initially
         const mainMonth = document.getElementById('monthSelect').value;
@@ -1251,11 +1301,17 @@ document.addEventListener('DOMContentLoaded', function() {
     function regenerateLimitationsTable() {
         if (!currentEngineerForLimitations) return; // Should not happen if called correctly
 
-        const engineer = currentEngineerForLimitations; // Use the globally stored engineer
+        const engineerName = currentEngineerForLimitations.name; // Use name as key
 
         // Get current Jalali month and year from the MODAL dropdowns
         const month = parseInt(limitationsMonthSelect.value);
         const year = parseInt(limitationsYearSelect.value);
+
+        // --- Get limitations for the SPECIFIC year and month ---
+        const yearLims = (engineerLimitations[engineerName] && engineerLimitations[engineerName][year]) ? engineerLimitations[engineerName][year] : {};
+        const monthLims = yearLims[month] || {}; // Get limitations for this specific month, default to empty object
+        console.log(`DEBUG: Regenerating table for ${engineerName}, Year: ${year}, Month: ${month}. Found limitations:`, JSON.stringify(monthLims));
+        // --- End Specific Limitations ---
 
         // Get days in Jalali month
         const daysInMonth = jalaali.jalaaliMonthLength(year, month);
@@ -1325,13 +1381,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 checkbox.dataset.day = day; // Store day as number
                 checkbox.dataset.shift = `shift${shift}`;
                 
-                // Check if this day/shift combination is in the limitations
-                // Ensure limitations are checked using string keys for days
+                // Check if this day/shift combination is in the limitations FOR THIS MONTH/YEAR
                 const dayStr = String(day);
-                if (engineer.limitations && 
-                    engineer.limitations[dayStr] && 
-                    Array.isArray(engineer.limitations[dayStr]) &&
-                    engineer.limitations[dayStr].includes(`shift${shift}`)) {
+                // Use monthLims (specific to year/month) instead of engineer.limitations
+                if (monthLims[dayStr] &&
+                    Array.isArray(monthLims[dayStr]) &&
+                    monthLims[dayStr].includes(`shift${shift}`)) {
                     checkbox.checked = true;
                 }
                 
@@ -1359,65 +1414,113 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function saveLimitations() {
         if (!currentEngineerForLimitations) return;
-        
-        // Collect all limitations
-        const limitations = {};
+
+        const engineerName = currentEngineerForLimitations.name;
+        // --- Get Year/Month from Modal --- 
+        const month = parseInt(limitationsMonthSelect.value);
+        const year = parseInt(limitationsYearSelect.value);
+        // Ensure year/month are valid numbers before proceeding
+        if (isNaN(year) || isNaN(month)) {
+            console.error("SAVE_LIMITATIONS: Invalid year or month selected in modal.");
+            alert("خطای داخلی: سال یا ماه نامعتبر است.");
+            return;
+        }
+        // --- Convert to strings for sending --- 
+        const yearStr = String(year);
+        const monthStr = String(month);
+        // ---
+
+        // Collect all limitations FOR THIS MONTH/YEAR from the modal
+        const limitationsForMonth = {}; // Changed variable name for clarity
         document.querySelectorAll('.limitation-checkbox:checked').forEach(checkbox => {
             const day = checkbox.dataset.day;
             const shift = checkbox.dataset.shift;
-            
+
             // Ensure day is stored as string
             const dayStr = String(day);
-            
-            if (!limitations[dayStr]) {
-                limitations[dayStr] = [];
+
+            if (!limitationsForMonth[dayStr]) {
+                limitationsForMonth[dayStr] = [];
             }
-            
-            limitations[dayStr].push(shift);
+
+            limitationsForMonth[dayStr].push(shift);
         });
-        
-        console.log('Collected limitations:', JSON.stringify(limitations));
-        
-        // Update the engineer's limitations
-        currentEngineerForLimitations.limitations = limitations;
-        
-        // Update the global engineers array
-        const engineerIndex = engineers.findIndex(eng => eng.name === currentEngineerForLimitations.name);
-        if (engineerIndex !== -1) {
-            engineers[engineerIndex].limitations = limitations;
+
+        console.log(`Collected limitations for ${engineerName}, Year: ${year}, Month: ${month}:`, JSON.stringify(limitationsForMonth));
+
+        // --- Update the NESTED engineerLimitations structure locally ---
+        if (!engineerLimitations[engineerName]) {
+            engineerLimitations[engineerName] = {};
         }
-        
-        // Save to server
+        if (!engineerLimitations[engineerName][year]) {
+            engineerLimitations[engineerName][year] = {};
+        }
+        engineerLimitations[engineerName][year][month] = limitationsForMonth; // Store limitations under year/month
+
+        // Update the engineer object in the main 'engineers' array as well (for consistency if used elsewhere)
+        const engineerIndex = engineers.findIndex(eng => eng.name === engineerName);
+        if (engineerIndex !== -1) {
+             // Ensure the nested structure exists before assigning
+            if (!engineers[engineerIndex].limitations) {
+                engineers[engineerIndex].limitations = {};
+            }
+             if (!engineers[engineerIndex].limitations[year]) {
+                engineers[engineerIndex].limitations[year] = {};
+            }
+            engineers[engineerIndex].limitations[year][month] = limitationsForMonth;
+        }
+        // --- End Local Update ---
+
+
+        // --- Save to server - Sending year, month, and specific limitations ---
+        // Note: We might need to update the backend API endpoint /api/engineers
+        //       to handle 'year' and 'month' parameters specifically for limitations.
+        //       Alternatively, create a dedicated endpoint like /api/engineers/{name}/limitations/{year}/{month}
+        //       For now, let's try sending it to the existing endpoint and assume/request backend modification.
         fetch('/api/engineers', {
-            method: 'POST',
+            method: 'POST', // Assuming POST updates or creates
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
                 name: currentEngineerForLimitations.name,
+                // Send other data as before, but include year/month and the specific limitations
                 workplaces: currentEngineerForLimitations.workplaces,
-                limitations: limitations, // Send the collected limitations
-                // Include min/max shifts to prevent accidental overwrite on server
-                minShifts: currentEngineerForLimitations.minShifts || 10, 
+                limitations: limitationsForMonth, // Send only the limitations for this specific month
+                year: year,                       // Send the numeric year (backend converts to string if needed)
+                month: month,                     // Send the numeric month (backend converts to string if needed)
+                minShifts: currentEngineerForLimitations.minShifts || 10,
                 maxShifts: currentEngineerForLimitations.maxShifts || 30
             })
         })
-        .then(response => response.json())
+        .then(response => {
+             if (!response.ok) { // Check for HTTP errors
+                 return response.json().then(err => {
+                     throw new Error(err.message || `Server error: ${response.status}`);
+                 });
+             }
+             return response.json();
+         })
         .then(data => {
             if (data.status === 'success') {
                 // Close modal
                 bootstrap.Modal.getInstance(document.getElementById('limitationsModal')).hide();
-                
-                // Reload engineers
-                loadEngineers();
-                
+
+                // Reload engineers to reflect potential changes from backend & update list display
+                loadEngineers(); // This will repopulate engineerLimitations and update the list
+
                 // Show success message
-                alert('محدودیت‌ها با موفقیت ذخیره شدند!');
+                alert(`محدودیت‌های ${engineerName} برای ${PERSIAN_MONTH_NAMES[month]} ${year} با موفقیت ذخیره شدند!`);
+            } else {
+                 // Handle specific error message from backend if available
+                 throw new Error(data.message || 'Failed to save limitations.');
             }
         })
         .catch(error => {
             console.error('Error saving limitations:', error);
-            alert('Failed to save limitations. Please try again.');
+            // Restore the local limitations state if save failed? Maybe too complex for now.
+            // Show a more informative error message
+            alert(`Failed to save limitations. ${error.message}`);
         });
     }
     

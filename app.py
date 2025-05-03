@@ -168,41 +168,124 @@ def load_engineers():
         with open(ENGINEERS_FILE, 'r', encoding='utf-8') as f:
             engineers = json.load(f)
             print(f"LOAD_ENGINEERS: Successfully loaded {len(engineers)} engineers from file")
-            return engineers
+            
+            # --- Data Cleaning/Validation --- 
+            cleaned_engineers = []
+            data_was_cleaned = False
+            for eng in engineers:
+                limits = eng.get('limitations')
+                is_valid = True
+                eng_name = eng.get('name', '[Unknown Engineer]')
+
+                if limits is None:
+                    eng['limitations'] = {}
+                    # No cleaning needed, just ensuring it exists
+                elif not isinstance(limits, dict):
+                    print(f"LOAD_ENGINEERS CLEANUP: Limitations for {eng_name} was not a dict ({type(limits)}). Resetting to {{}}.")
+                    is_valid = False
+                else: # It is a dictionary, validate structure
+                    for year_key, year_val in limits.items():
+                        # Check Year Key: Must be a 4-digit string
+                        if not isinstance(year_key, str) or not year_key.isdigit() or len(year_key) != 4:
+                            print(f"LOAD_ENGINEERS CLEANUP: Invalid year key '{year_key}' ({type(year_key)}) found for {eng_name}. Resetting limitations.")
+                            is_valid = False; break
+                        
+                        # Check Year Value: Must be a dictionary
+                        if not isinstance(year_val, dict):
+                            print(f"LOAD_ENGINEERS CLEANUP: Value for year '{year_key}' is not a dict ({type(year_val)}) for {eng_name}. Resetting limitations.")
+                            is_valid = False; break
+                            
+                        # Check Month Keys/Values within the year
+                        for month_key, month_val in year_val.items():
+                            # Check Month Key: Must be a 1 or 2 digit string representing 1-12
+                            is_valid_month_key = (isinstance(month_key, str) and 
+                                                  month_key.isdigit() and 
+                                                  1 <= int(month_key) <= 12)
+                            if not is_valid_month_key:
+                                print(f"LOAD_ENGINEERS CLEANUP: Invalid month key '{month_key}' ({type(month_key)}) in year '{year_key}' for {eng_name}. Resetting limitations.")
+                                is_valid = False; break
+                                
+                            # Check Month Value: Must be a dictionary (containing day:shifts)
+                            if not isinstance(month_val, dict):
+                                print(f"LOAD_ENGINEERS CLEANUP: Value for month '{month_key}' in year '{year_key}' is not a dict ({type(month_val)}) for {eng_name}. Resetting limitations.")
+                                is_valid = False; break
+                                
+                        if not is_valid: break # Exit year loop if month was invalid
+
+                # If validation failed, reset the limitations for this engineer
+                if not is_valid:
+                    eng['limitations'] = {}
+                    data_was_cleaned = True # Mark that we made a change
+                
+                cleaned_engineers.append(eng)
+            # --- End Data Cleaning --- 
+            
+            # If we cleaned any data, save it back immediately
+            if data_was_cleaned:
+                print("LOAD_ENGINEERS CLEANUP: Invalid limitation structures found and reset. Saving cleaned data...")
+                save_engineers(cleaned_engineers) # Save the cleaned list
+                return cleaned_engineers # Return the cleaned data for immediate use
+            else:
+                return engineers # Return original data if no cleaning was needed
+
     except Exception as e:
         print(f"LOAD_ENGINEERS ERROR: {str(e)}")
         return []
 
 def save_engineers(engineers):
+    lock_file_path = ENGINEERS_FILE + '.lock'
     try:
-        if not isinstance(engineers, list):
-            print(f"SAVE_ENGINEERS ERROR: Engineers is not a list, it's a {type(engineers)}")
-            return
+        # Basic file locking mechanism (consider a more robust library like filelock for production)
+        with open(lock_file_path, 'w') as lock_file:
+            # Optional: Add locking logic here if using a library
+            print(f"SAVE_ENGINEERS: Acquired lock {lock_file_path}")
+            
+            if not isinstance(engineers, list):
+                print(f"SAVE_ENGINEERS ERROR: Engineers is not a list, it's a {type(engineers)}")
+                return
 
-        if len(engineers) == 0:
-            print("SAVE_ENGINEERS WARNING: Saving an empty engineers list!")
-            
-        # Create backup of current file if it exists
-        if os.path.exists(ENGINEERS_FILE):
+            if len(engineers) == 0:
+                print("SAVE_ENGINEERS WARNING: Saving an empty engineers list!")
+                
+            # Create backup of current file if it exists
             backup_file = f"{ENGINEERS_FILE}.bak"
-            shutil.copy2(ENGINEERS_FILE, backup_file)
-            print(f"SAVE_ENGINEERS: Created backup at {backup_file}")
+            if os.path.exists(ENGINEERS_FILE):
+                shutil.copy2(ENGINEERS_FILE, backup_file)
+                print(f"SAVE_ENGINEERS: Created backup at {backup_file}")
+                
+            print(f"SAVE_ENGINEERS: Preparing to save {len(engineers)} engineers to file")
+            # print(f"SAVE_ENGINEERS: Engineer names: {[eng.get('name', 'UNNAMED') for eng in engineers]}") # Can be verbose
             
-        print(f"SAVE_ENGINEERS: Saving {len(engineers)} engineers to file")
-        # Print names of engineers being saved
-        print(f"SAVE_ENGINEERS: Engineer names: {[eng.get('name', 'UNNAMED') for eng in engineers]}")
-        
-        with open(ENGINEERS_FILE, 'w', encoding='utf-8') as f:
-            json.dump(engineers, f, indent=2, ensure_ascii=False)
+            # Write to a temporary file first
+            temp_file_path = ENGINEERS_FILE + '.tmp'
+            with open(temp_file_path, 'w', encoding='utf-8') as f:
+                json.dump(engineers, f, indent=2, ensure_ascii=False)
+                f.flush()  # Ensure buffer is written to OS
+                os.fsync(f.fileno()) # Force write to disk
+                print(f"SAVE_ENGINEERS: Data flushed and synced to temporary file {temp_file_path}")
             
-        print(f"SAVE_ENGINEERS: Successfully saved {len(engineers)} engineers")
+            # Atomically replace the original file with the temporary file
+            os.replace(temp_file_path, ENGINEERS_FILE)
+            print(f"SAVE_ENGINEERS: Successfully saved {len(engineers)} by replacing {ENGINEERS_FILE} with {temp_file_path}")
+
     except Exception as e:
         print(f"SAVE_ENGINEERS ERROR: {str(e)}")
-        # Try to restore from backup if available
+        # Attempt to restore from backup if available
         backup_file = f"{ENGINEERS_FILE}.bak"
         if os.path.exists(backup_file):
             print(f"SAVE_ENGINEERS: Restoring from backup {backup_file}")
-            shutil.copy2(backup_file, ENGINEERS_FILE)
+            try:
+                shutil.copy2(backup_file, ENGINEERS_FILE)
+            except Exception as restore_e:
+                print(f"SAVE_ENGINEERS ERROR: Failed to restore backup: {restore_e}")
+    finally:
+        # Clean up lock file
+        if os.path.exists(lock_file_path):
+            try:
+                os.remove(lock_file_path)
+                print(f"SAVE_ENGINEERS: Released lock {lock_file_path}")
+            except Exception as remove_e:
+                 print(f"SAVE_ENGINEERS ERROR: Failed to remove lock file {lock_file_path}: {remove_e}")
 
 def load_schedules():
     try:
@@ -523,15 +606,56 @@ def add_engineer():
     
     if engineer_exists:
         print(f"ADD_ENGINEER: Updating existing engineer at index {engineer_index}: {data['name']}")
-        # Create a new dict for the updated engineer
-        updated_engineer = {
-            'name': data['name'],
-            'workplaces': data['workplaces'],
-            'limitations': data.get('limitations', {}),
-            'minShifts': data.get('minShifts', 10),
-            'maxShifts': data.get('maxShifts', 30)
-        }
-        # Replace the old engineer with the updated one
+        # Get the existing engineer's data
+        existing_engineer_data = engineers[engineer_index]
+
+        # Check if year and month are provided for a specific limitation update
+        year = data.get('year')
+        month = data.get('month')
+
+        # Initialize the updated data with existing values
+        updated_engineer = existing_engineer_data.copy() 
+
+        # Update basic info always
+        updated_engineer['workplaces'] = data['workplaces']
+        updated_engineer['minShifts'] = data.get('minShifts', existing_engineer_data.get('minShifts', 10))
+        updated_engineer['maxShifts'] = data.get('maxShifts', existing_engineer_data.get('maxShifts', 30))
+
+        if year is not None and month is not None:
+            print(f"ADD_ENGINEER: Updating limitations for specific period: Year {year}, Month {month}")
+            limitations_for_month = data.get('limitations', {})
+            
+            # --- Ensure consistent STRING key usage --- 
+            year_str = str(year)
+            month_str = str(month)
+            
+            # Ensure the main limitations dictionary exists and is a dict
+            if not isinstance(updated_engineer.get('limitations'), dict):
+                updated_engineer['limitations'] = {}
+            
+            # Ensure the year key (as STRING) exists and is a dict
+            if year_str not in updated_engineer['limitations'] or not isinstance(updated_engineer['limitations'][year_str], dict):
+                updated_engineer['limitations'][year_str] = {}
+                
+            # Update the limitations for the specific month (using string keys)
+            updated_engineer['limitations'][year_str][month_str] = limitations_for_month
+            # --- End STRING key usage correction ---
+            
+            print(f"ADD_ENGINEER: Updated limitations structure: {updated_engineer['limitations']}")
+            
+            # Add notification if limitations were updated
+            try:
+                add_limitation_update_notification(updated_engineer['name'], year_str, month_str)
+                print(f"ADD_ENGINEER: Added limitation update notification for {updated_engineer['name']}")
+            except Exception as e:
+                print(f"ADD_ENGINEER: Error adding notification: {e}")
+        else:
+             # If year/month are not provided, check if 'limitations' key exists in request data
+            if 'limitations' in data:
+                 print(f"ADD_ENGINEER: Updating/Replacing ENTIRE limitations structure based on request data.")
+                 updated_engineer['limitations'] = data['limitations']
+
+        # Replace the old engineer with the updated one in the main list
         engineers[engineer_index] = updated_engineer
     else:
         print(f"ADD_ENGINEER: Adding new engineer: {data['name']}")
@@ -887,8 +1011,7 @@ def engineer_dashboard():
 def save_engineer_limitations():
     engineer_name = session['user']['engineer_name']
     data = request.json
-    # These are the limitations submitted for the currently viewed month
-    new_month_limitations = data.get('limitations', {})
+    new_month_limitations = data.get('limitations', {}) # Limits for the month being saved
     year = data.get('year')
     month = data.get('month')
 
@@ -896,63 +1019,56 @@ def save_engineer_limitations():
          return jsonify({"error": "Year and month are required to save limitations."}), 400
 
     try:
-        year_int = int(year)
-        month_int = int(month)
-        # Calculate number of days in the specific month
-        if 1 <= month_int <= 6:
-            days_in_month = 31
-        elif 7 <= month_int <= 11:
-            days_in_month = 30
-        elif month_int == 12:
-            days_in_month = 30 if jdt.isleap(year_int) else 29
-        else:
-            raise ValueError("Invalid month")
-    except ValueError:
-         return jsonify({"error": "Invalid year or month provided."}), 400
+        # Convert to string keys immediately for consistency
+        year_str = str(int(year))
+        month_str = str(int(month))
+    except (ValueError, TypeError):
+         return jsonify({"error": "Invalid year or month format provided."}), 400
 
-    print(f"Saving limitations for engineer: {engineer_name}, Year: {year}, Month: {month}")
-    # print(f"Received limitations data for this month: {new_month_limitations}")
+    print(f"Saving limitations for engineer: {engineer_name}, Year: {year_str}, Month: {month_str}")
 
     engineers = load_engineers()
     engineer_found = False
-    updated_engineer_limitations = None
+    updated_engineer_limitations_full = None # For logging the full structure
 
     for eng in engineers:
         if eng['name'] == engineer_name:
-            # Get a copy of the engineer's existing limitations or an empty dict
-            # IMPORTANT: Assumes limitations are stored flatly by day number string key
-            current_eng_limits = eng.get('limitations', {}).copy()
-            print(f"LIMIT_SAVE: Existing limitations for {engineer_name}: {current_eng_limits}")
-
-            # Iterate through the days *of the month being edited*
-            for day in range(1, days_in_month + 1):
-                day_str = str(day)
+            # --- CORRECTED LOGIC START ---
+            # Get the existing limitations structure, ensure it's a dict
+            current_eng_limits = eng.get('limitations', {}) 
+            if not isinstance(current_eng_limits, dict):
+                print(f"Warning: Limitations for {engineer_name} was not a dict, resetting.")
+                current_eng_limits = {} # Initialize/reset if not a dict
                 
-                # Check if this day was submitted with new limitations
-                if day_str in new_month_limitations:
-                    # Update or add the limitation for this day
-                    current_eng_limits[day_str] = new_month_limitations[day_str]
-                else:
-                    # If the day was *not* submitted, it means it should be cleared *if it existed before*
-                    if day_str in current_eng_limits:
-                        del current_eng_limits[day_str]
+            # Ensure the year key (as string) exists
+            if year_str not in current_eng_limits:
+                current_eng_limits[year_str] = {}
+            elif not isinstance(current_eng_limits[year_str], dict):
+                print(f"Warning: Limitations for {engineer_name} year {year_str} was not a dict, resetting year.")
+                current_eng_limits[year_str] = {} # Reset year if not a dict
+                
+            # Directly replace the limitations for THIS specific month (using string keys)
+            current_eng_limits[year_str][month_str] = new_month_limitations
             
-            # Limitations for days outside this month remain untouched in current_eng_limits
-            
-            # Update the engineer's limitations in the list
-            eng['limitations'] = current_eng_limits
-            updated_engineer_limitations = current_eng_limits # Store for logging
+            # Update the engineer's limitations field in the main list
+            eng['limitations'] = current_eng_limits 
+            updated_engineer_limitations_full = current_eng_limits # Store the updated full structure for logging
+            # --- CORRECTED LOGIC END ---
             engineer_found = True
             break
     
     if not engineer_found:
         return jsonify({"error": "Engineer profile not found."}), 404
 
-    print(f"LIMIT_SAVE: Updated limitations for {engineer_name}: {updated_engineer_limitations}")
+    print(f"LIMIT_SAVE (Engineer): Updated full limitations structure for {engineer_name}: {updated_engineer_limitations_full}")
     save_engineers(engineers)
     
-    # Add Notification for Admin
-    add_limitation_update_notification(engineer_name, year, month) 
+    # Add Notification for Admin (using string year/month)
+    try:
+        add_limitation_update_notification(engineer_name, year_str, month_str)
+        print(f"LIMIT_SAVE (Engineer): Added limitation update notification for {engineer_name}")
+    except Exception as e:
+        print(f"LIMIT_SAVE (Engineer): Error adding notification: {e}")
     
     return jsonify({"status": "success"})
 

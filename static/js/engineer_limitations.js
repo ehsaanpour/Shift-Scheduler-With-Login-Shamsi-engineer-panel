@@ -44,6 +44,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initial calendar generation
     if (typeof generateLimitationsCalendar === 'function') {
+        // --- NEW: Ensure engineerData.limitations is properly structured ---
+        if (engineerData && engineerData.limitations && typeof engineerData.limitations !== 'object') {
+             console.warn("DEBUG: engineerData.limitations is not an object, initializing to empty object.");
+             engineerData.limitations = {}; // Ensure it's at least an empty object
+        } else if (engineerData && !engineerData.limitations) {
+             console.warn("DEBUG: engineerData.limitations is missing, initializing to empty object.");
+             engineerData.limitations = {};
+        }
+        // --- END NEW ---
         generateLimitationsCalendar();
     } else {
         console.error("generateLimitationsCalendar function not found!");
@@ -161,9 +170,12 @@ function generateLimitationsCalendar() {
 
     const tbody = document.createElement('tbody');
     // Use the globally defined engineerData
-    console.log("DEBUG: engineerData inside generateLimitationsCalendar:", JSON.stringify(engineerData)); 
-    const currentLimitations = (typeof engineerData !== 'undefined' && engineerData && engineerData.limitations) ? engineerData.limitations : {};
-    console.log("DEBUG: Using limitations for calendar:", JSON.stringify(currentLimitations)); 
+    // --- Get limitations for the SPECIFIC year and month ---
+    const engineerLims = (typeof engineerData !== 'undefined' && engineerData && engineerData.limitations && typeof engineerData.limitations === 'object') ? engineerData.limitations : {};
+    const yearLims = engineerLims[year] || {}; // Get limits for the selected year
+    const monthLims = yearLims[month] || {}; // Get limits for the selected month
+    console.log(`DEBUG: Generating table for Year: ${year}, Month: ${month}. Found limitations:`, JSON.stringify(monthLims));
+    // --- End Specific Limitations ---
 
     for (let day = 1; day <= daysInMonth; day++) {
         const jDate = jalaali.toGregorian(year, month, day);
@@ -197,12 +209,10 @@ function generateLimitationsCalendar() {
             checkbox.dataset.day = dayStr;
             checkbox.dataset.shift = shiftKey;
             
-            // Log the check itself
-            const dayHasLimit = currentLimitations.hasOwnProperty(dayStr);
-            const shiftsForDay = dayHasLimit ? currentLimitations[dayStr] : [];
-            const shouldBeChecked = dayHasLimit && Array.isArray(shiftsForDay) && shiftsForDay.includes(shiftKey);
-            
-            // console.log(`DEBUG: Checking Day: ${dayStr}, Shift: ${shiftKey}. Day Exists: ${dayHasLimit}, Shifts: ${JSON.stringify(shiftsForDay)}, Includes: ${shiftsForDay.includes(shiftKey)}, Should Check: ${shouldBeChecked}`); // Verbose log
+            // Check against the specific month's limitations (monthLims)
+            const shiftsForDay = monthLims[dayStr] || []; // Get limitations for this specific day
+            const shouldBeChecked = Array.isArray(shiftsForDay) && shiftsForDay.includes(shiftKey);
+            // console.log(`DEBUG: Checking Day: ${dayStr}, Shift: ${shiftKey}. MonthLims[${dayStr}]: ${JSON.stringify(shiftsForDay)}, Includes: ${shiftsForDay.includes(shiftKey)}, Should Check: ${shouldBeChecked}`); // Verbose log
 
             if (shouldBeChecked) {
                  console.log(`---> DEBUG: CHECKING BOX for Day ${dayStr}, Shift ${shiftKey}`); // Log when checking
@@ -232,19 +242,19 @@ function saveLimitations() {
     const month = parseInt(monthSelect.value);
     const year = parseInt(yearSelect.value);
 
-    // Collect limitations from checkboxes
-    const limitations = {};
+    // Collect limitations from checkboxes FOR THIS MONTH/YEAR
+    const limitationsForMonth = {}; // Renamed for clarity
     document.querySelectorAll('.limitation-check:checked').forEach(checkbox => {
         const day = checkbox.dataset.day;
         const shift = checkbox.dataset.shift;
-        
-        if (!limitations[day]) {
-            limitations[day] = [];
+
+        if (!limitationsForMonth[day]) {
+            limitationsForMonth[day] = [];
         }
-        limitations[day].push(shift);
+        limitationsForMonth[day].push(shift);
     });
 
-    console.log(`Saving limitations for ${year}-${month}:`, limitations);
+    console.log(`Saving limitations for ${year}-${month}:`, limitationsForMonth);
 
     // Disable button and show loading state
     const originalBtnText = saveButton.innerHTML;
@@ -255,40 +265,35 @@ function saveLimitations() {
     fetch('/api/engineer/limitations', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
-            // Add CSRF token header if needed later
+            'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ 
-            limitations: limitations,
-            year: year, // Send year/month context
-            month: month
-         }) 
+        body: JSON.stringify({
+            year: year,
+            month: month,
+            limitations: limitationsForMonth // Send collected limitations for this month
+        })
     })
     .then(response => {
         if (!response.ok) {
-            return response.json().then(err => { throw new Error(err.error || `Server error: ${response.status}`) });
-        }
+             return response.json().then(err => { throw new Error(err.message || `Server error: ${response.status}`); });
+         }
         return response.json();
     })
     .then(data => {
         if (data.status === 'success') {
-            // Update the global engineerData limitations in memory 
-            // (important for re-generating calendar without full page reload)
-            if (engineerData) { // Check if engineerData exists
-                engineerData.limitations = limitations; 
+            if (typeof engineerData !== 'undefined' && engineerData) {
+                if (!engineerData.limitations || typeof engineerData.limitations !== 'object') {
+                    engineerData.limitations = {}; // Initialize if not present or wrong type
+                }
+                if (!engineerData.limitations[year]) {
+                    engineerData.limitations[year] = {}; // Initialize year if not present
+                }
+                engineerData.limitations[year][month] = limitationsForMonth; // Update only this month's limitations
+                 console.log("DEBUG: Updated local engineerData.limitations:", JSON.stringify(engineerData.limitations));
             }
-            
-            // Show success feedback (maybe a temporary message near the button)
-            const feedback = document.createElement('span');
-            feedback.className = 'ms-2 text-success small';
-            feedback.textContent = 'با موفقیت ذخیره شد!';
-            saveButton.parentNode.insertBefore(feedback, saveButton.nextSibling);
-            setTimeout(() => feedback.remove(), 3000);
-
-            // Optionally: could show a more prominent alert, but might be excessive
-            // alert('محدودیت‌ها با موفقیت ذخیره شدند!');
+            alert('محدودیت‌ها با موفقیت ذخیره شدند!');
         } else {
-             throw new Error(data.error || 'ذخیره محدودیت‌ها ناموفق بود.');
+            throw new Error(data.message || 'Failed to save limitations.');
         }
     })
     .catch(error => {
