@@ -1352,11 +1352,25 @@ function applyPattern() {
                 // Skip if engineer not found
                 if (!engineer) return;
                 
-                // Check if the engineer has limitations for this day and shift
-                if (engineer.limitations && 
-                    (engineer.limitations[day] || engineer.limitations[`${day}`]) &&
-                    ((engineer.limitations[day] && engineer.limitations[day].includes(shift)) ||
-                     (engineer.limitations[`${day}`] && engineer.limitations[`${day}`].includes(shift)))) {
+                // --- Corrected Limitation Check ---
+                // Get the current year and month from the main dropdowns
+                const currentYear = document.getElementById('yearSelect').value;
+                const currentMonth = document.getElementById('monthSelect').value;
+                const dayStr = String(day); // Ensure day is a string key
+
+                let hasLimitation = false;
+                // Check the nested structure: engineer.limitations[year][month][day]
+                if (engineer.limitations &&
+                    engineer.limitations[currentYear] &&
+                    engineer.limitations[currentYear][currentMonth] &&
+                    engineer.limitations[currentYear][currentMonth][dayStr] &&
+                    Array.isArray(engineer.limitations[currentYear][currentMonth][dayStr]) &&
+                    engineer.limitations[currentYear][currentMonth][dayStr].includes(shift)) {
+                    hasLimitation = true;
+                }
+                // --- End Corrected Limitation Check ---
+
+                if (hasLimitation) {
                     skippedDueToLimitations++;
                     return;
                 }

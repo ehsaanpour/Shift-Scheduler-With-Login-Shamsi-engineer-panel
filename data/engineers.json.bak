@@ -8,28 +8,23 @@
     "limitations": {
       "1404": {
         "2": {
-          "8": [
+          "1": [
+            "shift1",
+            "shift2",
             "shift3"
+          ],
+          "7": [
+            "shift2"
+          ],
+          "8": [
+            "shift1",
+            "shift2"
           ],
           "9": [
-            "shift3"
+            "shift1"
           ],
           "10": [
-            "shift3"
-          ],
-          "11": [
-            "shift3"
-          ]
-        },
-        "3": {
-          "10": [
-            "shift3"
-          ],
-          "11": [
-            "shift3"
-          ],
-          "12": [
-            "shift3"
+            "shift2"
           ]
         }
       }
@@ -43,7 +38,15 @@
       "Studio Hispan",
       "Studio Press"
     ],
-    "limitations": {},
+    "limitations": {
+      "1404": {
+        "2": {
+          "1": [
+            "shift2"
+          ]
+        }
+      }
+    },
     "minShifts": 10,
     "maxShifts": 30
   },
@@ -129,7 +132,16 @@
       "Studio Press",
       "Nodal"
     ],
-    "limitations": {},
+    "limitations": {
+      "1404": {
+        "2": {
+          "1": [
+            "shift1",
+            "shift3"
+          ]
+        }
+      }
+    },
     "minShifts": 10,
     "maxShifts": 30
   },
@@ -162,7 +174,15 @@
       "Studio Press",
       "Nodal"
     ],
-    "limitations": {},
+    "limitations": {
+      "1404": {
+        "2": {
+          "1": [
+            "shift2"
+          ]
+        }
+      }
+    },
     "minShifts": 10,
     "maxShifts": 30
   },

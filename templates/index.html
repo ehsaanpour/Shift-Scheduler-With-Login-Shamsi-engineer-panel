@@ -784,7 +784,8 @@ document.addEventListener('DOMContentLoaded', function() {
             // Add limitations info if any - CHECK THE NESTED STRUCTURE
             // Correctly calculate total limitations across all years/months stored
             let totalLimitCount = 0;
-            const engLims = engineerLimitations[eng.name] || {}; // Use the centrally stored limits
+            // Read limitations directly from the engineer object in the global 'engineers' array
+            const engLims = eng.limitations || {}; // Use eng.limitations instead of engineerLimitations[eng.name]
             for (const year in engLims) {
                 if (Object.hasOwnProperty.call(engLims, year)) {
                     const yearLims = engLims[year];
@@ -1052,14 +1053,31 @@ document.addEventListener('DOMContentLoaded', function() {
                     emptyOption.textContent = '---'; // Keep placeholder short
                     select.appendChild(emptyOption);
                     
-                    // Filter engineers who can work in this workplace
-                    // Ensure window.engineers exists before filtering
+                    // Filter engineers who can work in this workplace AND are available for this shift
+                    const shiftKey = `shift${shift}`; // e.g., "shift1"
+                    const dayStr = String(day); // Use string for day key
                     (window.engineers || []).filter(eng => eng.workplaces.includes(workplaceName))
                             .forEach(eng => {
-                                const option = document.createElement('option');
-                                option.value = eng.name;
-                                option.textContent = eng.name;
-                                select.appendChild(option);
+                                // --- Check for limitations for this specific engineer, year, month, day, and shift ---
+                                let isLimited = false;
+                                // Access the global engineerLimitations, checking each level
+                                if (engineerLimitations[eng.name] &&
+                                    engineerLimitations[eng.name][year] &&
+                                    engineerLimitations[eng.name][year][month] &&
+                                    engineerLimitations[eng.name][year][month][dayStr] &&
+                                    Array.isArray(engineerLimitations[eng.name][year][month][dayStr]) &&
+                                    engineerLimitations[eng.name][year][month][dayStr].includes(shiftKey)) {
+                                    isLimited = true;
+                                }
+                                // --- End Limitation Check ---
+
+                                // Only add the engineer to the dropdown if they are NOT limited
+                                if (!isLimited) {
+                                    const option = document.createElement('option');
+                                    option.value = eng.name;
+                                    option.textContent = eng.name;
+                                    select.appendChild(option);
+                                }
                             });
                     
                     cell.appendChild(select);
