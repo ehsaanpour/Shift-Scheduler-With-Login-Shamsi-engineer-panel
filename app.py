@@ -918,9 +918,10 @@ def create_excel_schedule(file_path, workplace, year, month, schedule_data):
             g_date = j_date.togregorian()
             
             # Get Persian day name 
-            gregorian_weekday = g_date.weekday()
+            gregorian_weekday = g_date.weekday() # Monday is 0, Sunday is 6
             
-            persian_weekday_index = (gregorian_weekday + 1) % 7 
+            # Correct mapping: Gregorian Mon(0)->Shamsi Mon(2), Sat(5)->Shamsi Sat(0), Sun(6)->Shamsi Sun(1)
+            persian_weekday_index = (gregorian_weekday + 2) % 7 
             persian_day_name = PERSIAN_DAY_NAMES[persian_weekday_index]
             
         except ValueError as loop_ve:
@@ -941,7 +942,9 @@ def create_excel_schedule(file_path, workplace, year, month, schedule_data):
         day_cell.alignment = Alignment(horizontal='left', vertical='center')
         
         # Weekend formatting
-        is_weekend = (g_date.weekday() >= 5) if g_date else False 
+        # is_weekend = (g_date.weekday() >= 5) if g_date else False # Original line: Check if Gregorian weekday is 5 (Sat) or 6 (Sun)
+        # Shamsi weekend: Thursday (Gregorian weekday 3) and Friday (Gregorian weekday 4)
+        is_weekend = (g_date.weekday() == 3 or g_date.weekday() == 4) if g_date else False 
         if is_weekend:
             for col in range(1, 5):
                 ws.cell(row=row, column=col).fill = weekend_fill
