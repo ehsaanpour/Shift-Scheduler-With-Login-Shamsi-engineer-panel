@@ -165,6 +165,12 @@ function setupEventListeners() {
     if (generateReportBtn) {
         generateReportBtn.addEventListener('click', generateShiftReport);
     }
+
+    // New: Event listener for Confirm Clear Range button in modal
+    const confirmClearRangeBtn = document.getElementById('btnConfirmClearRange');
+    if (confirmClearRangeBtn) {
+        confirmClearRangeBtn.addEventListener('click', confirmClearRangeShifts);
+    }
 }
 
 // Load engineers from API
@@ -1526,6 +1532,112 @@ async function generateShiftReport() {
     } catch (error) {
         console.error('Error generating report:', error);
         reportTableContainer.innerHTML = `<p class="text-center text-danger">خطا در تولید گزارش: ${error.message}</p>`;
+    }
+}
+
+// New: Function to handle clearing shifts within a specified range
+async function confirmClearRangeShifts() {
+    const startDayInput = document.getElementById('startDayRange');
+    const endDayInput = document.getElementById('endDayRange');
+    const validationFeedback = document.getElementById('clearRangeValidationFeedback');
+
+    const startDay = parseInt(startDayInput.value);
+    const endDay = parseInt(endDayInput.value);
+
+    const year = parseInt(document.getElementById('yearSelect').value);
+    const month = parseInt(document.getElementById('monthSelect').value);
+
+    validationFeedback.textContent = ''; // Clear previous validation messages
+
+    // Validation
+    if (isNaN(startDay) || isNaN(endDay)) {
+        validationFeedback.textContent = 'لطفاً روز شروع و پایان را به صورت عددی وارد کنید.';
+        return;
+    }
+    if (startDay < 1 || endDay < 1) {
+        validationFeedback.textContent = 'روزها باید بزرگتر یا مساوی ۱ باشند.';
+        return;
+    }
+    const daysInMonth = jalaali.jalaaliMonthLength(year, month);
+    if (startDay > daysInMonth || endDay > daysInMonth) {
+        validationFeedback.textContent = `روزهای انتخابی باید در محدوده ماه باشند (۱ تا ${daysInMonth}).`;
+        return;
+    }
+    if (startDay > endDay) {
+        validationFeedback.textContent = 'روز شروع نمی‌تواند بعد از روز پایان باشد.';
+        return;
+    }
+
+    // Clear shifts in UI for the specified range
+    document.querySelectorAll('.engineer-select').forEach(select => {
+        const dayOfSelect = parseInt(select.dataset.day);
+        if (dayOfSelect >= startDay && dayOfSelect <= endDay) {
+            select.value = '';
+            select.classList.remove('three-shifts-warning', 'consecutive-days-warning', 'three-shift3-warning');
+        }
+    });
+
+    // Collect the entire current schedule from the DOM (after UI modifications)
+    const workplaces = {};
+    document.querySelectorAll('.engineer-select').forEach(select => {
+        if (select.value) { // Only include assigned shifts
+            const workplace = select.dataset.workplace;
+            const day = select.dataset.day;
+            const shift = select.dataset.shift;
+
+            if (!workplaces[workplace]) {
+                workplaces[workplace] = {};
+            }
+            if (!workplaces[workplace][day]) {
+                workplaces[workplace][day] = {};
+            }
+            workplaces[workplace][day][shift] = select.value;
+        } else { // Ensure explicitly cleared shifts are not in the payload or are null
+            const workplace = select.dataset.workplace;
+            const day = select.dataset.day;
+            const shift = select.dataset.shift;
+            if (parseInt(day) >= startDay && parseInt(day) <= endDay) {
+                 if (!workplaces[workplace]) { workplaces[workplace] = {}; }
+                 if (!workplaces[workplace][day]) { workplaces[workplace][day] = {}; }
+                 workplaces[workplace][day][shift] = null; // Or simply don't add it, as above
+            }
+        }
+    });
+
+    // Save the modified schedule to the server
+    try {
+        const response = await fetch('/api/schedule', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                year,
+                month,
+                workplaces // This contains the full schedule with the range cleared
+            })
+        });
+        if (!response.ok) {
+            throw new Error(`Server error: ${response.statusText}`);
+        }
+        const data = await response.json();
+        if (data.status === 'success') {
+            showAlert(`شیفت‌ها از روز ${startDay} تا ${endDay} با موفقیت پاک و ذخیره شدند.`, 'success');
+            // Close the modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('clearRangeModal'));
+            if (modal) {
+                modal.hide();
+            }
+            // Reload schedule to reflect changes and re-apply highlights
+            loadSchedule(year, month);
+        } else {
+            throw new Error(data.message || 'خطا در ذخیره سازی برنامه.');
+        }
+    } catch (error) {
+        console.error('Error clearing range and saving schedule:', error);
+        showAlert(`خطا در پاک کردن بازه‌ای شیفت‌ها: ${error.message}`, 'danger');
+        // Optionally, provide more specific feedback in the modal validation area
+        validationFeedback.textContent = `خطا در ارتباط با سرور: ${error.message}`;
     }
 }
 

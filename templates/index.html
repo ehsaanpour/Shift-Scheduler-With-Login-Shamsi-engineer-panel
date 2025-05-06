@@ -135,6 +135,9 @@
                         <button id="btnClearShifts" class="btn btn-danger me-2">
                             <i class="fas fa-eraser me-1"></i> پاک کردن همه شیفت‌ها
                         </button>
+                        <button id="btnClearRange" class="btn btn-warning me-2" data-bs-toggle="modal" data-bs-target="#clearRangeModal">
+                            <i class="fas fa-calendar-minus me-1"></i> پاک کردن بازه‌ای
+                        </button>
                         <button id="btnAutoAssign" class="btn btn-warning me-2">
                             <i class="fas fa-magic me-1"></i> تخصیص خودکار مهندسان
                         </button>
@@ -143,6 +146,40 @@
                         </button>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Clear Range Modal -->
+<div class="modal fade" id="clearRangeModal" tabindex="-1" aria-labelledby="clearRangeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title" id="clearRangeModalLabel"><i class="fas fa-calendar-minus me-2"></i> پاک کردن بازه‌ای شیفت‌ها</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="بستن"></button>
+            </div>
+            <div class="modal-body">
+                <p>لطفا بازه روزهایی که می‌خواهید شیفت‌هایشان پاک شود را برای ماه و سال جاری انتخاب کنید.</p>
+                <div class="row g-3 align-items-center">
+                    <div class="col-auto">
+                        <label for="startDayRange" class="col-form-label">از روز:</label>
+                    </div>
+                    <div class="col-auto">
+                        <input type="number" id="startDayRange" class="form-control form-control-sm" min="1" max="31">
+                    </div>
+                    <div class="col-auto">
+                        <label for="endDayRange" class="col-form-label">تا روز:</label>
+                    </div>
+                    <div class="col-auto">
+                        <input type="number" id="endDayRange" class="form-control form-control-sm" min="1" max="31">
+                    </div>
+                </div>
+                 <div id="clearRangeValidationFeedback" class="text-danger mt-2 small"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">انصراف</button>
+                <button type="button" class="btn btn-primary" id="btnConfirmClearRange">اعمال و ذخیره</button>
             </div>
         </div>
     </div>
