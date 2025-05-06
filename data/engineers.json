@@ -769,17 +769,6 @@
     "maxShifts": 30
   },
   {
-    "name": "رودی",
-    "workplaces": [
-      "Studio Hispan",
-      "Studio Press",
-      "Nodal"
-    ],
-    "limitations": {},
-    "minShifts": 10,
-    "maxShifts": 30
-  },
-  {
     "name": "عنایت فرد",
     "workplaces": [
       "Studio Hispan",
@@ -917,7 +906,33 @@
       "Studio Press",
       "Nodal"
     ],
-    "limitations": {},
+    "limitations": {
+      "1404": {
+        "2": {},
+        "3": {
+          "13": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "14": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "15": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "16": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ]
+        }
+      }
+    },
     "minShifts": 10,
     "maxShifts": 30
   },
@@ -929,6 +944,9 @@
     "limitations": {
       "1404": {
         "2": {
+          "1": [
+            "shift3"
+          ],
           "2": [
             "shift1"
           ],
@@ -1428,17 +1446,6 @@
   },
   {
     "name": "فقیهی",
-    "workplaces": [
-      "Studio Hispan",
-      "Studio Press",
-      "Nodal"
-    ],
-    "limitations": {},
-    "minShifts": 10,
-    "maxShifts": 30
-  },
-  {
-    "name": "رودی",
     "workplaces": [
       "Studio Hispan",
       "Studio Press",

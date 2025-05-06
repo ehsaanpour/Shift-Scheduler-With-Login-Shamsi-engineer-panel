@@ -198,6 +198,15 @@
           "7": [
             "shift1"
           ],
+          "10": [
+            "shift3"
+          ],
+          "11": [
+            "shift3"
+          ],
+          "12": [
+            "shift3"
+          ],
           "13": [
             "shift3"
           ],
@@ -766,7 +775,73 @@
       "Studio Press",
       "Nodal"
     ],
-    "limitations": {},
+    "limitations": {
+      "1404": {
+        "2": {
+          "21": [
+            "shift1"
+          ],
+          "26": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "27": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "28": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "29": [
+            "shift1"
+          ]
+        },
+        "3": {
+          "4": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "5": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "6": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "7": [
+            "shift1"
+          ],
+          "13": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "14": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "15": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "16": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ]
+        }
+      }
+    },
     "minShifts": 10,
     "maxShifts": 30
   },
@@ -908,7 +983,33 @@
       "Studio Press",
       "Nodal"
     ],
-    "limitations": {},
+    "limitations": {
+      "1404": {
+        "2": {},
+        "3": {
+          "13": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "14": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "15": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "16": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ]
+        }
+      }
+    },
     "minShifts": 10,
     "maxShifts": 30
   },
@@ -920,6 +1021,9 @@
     "limitations": {
       "1404": {
         "2": {
+          "1": [
+            "shift3"
+          ],
           "2": [
             "shift1"
           ],

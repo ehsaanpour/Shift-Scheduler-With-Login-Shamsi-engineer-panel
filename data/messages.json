@@ -15,6 +15,69 @@
     "timestamp": "2025-05-03T14:51:15.923773+00:00",
     "content": "لطفا شیفت های خرداد من رو نودال ننویسید",
     "read_by_engineer": true,
+    "read_by_admin": true
+  },
+  {
+    "message_id": "c7d3fbb9-340e-4dd8-a1be-c52e60960fe0",
+    "engineer_name": "نوبخت",
+    "sender_role": "engineer",
+    "timestamp": "2025-05-03T15:18:10.570892+00:00",
+    "content": "ممنون",
+    "read_by_engineer": true,
+    "read_by_admin": true
+  },
+  {
+    "message_id": "b48c6262-ce5f-4c20-9722-24cc62c5cb31",
+    "engineer_name": "نوبخت",
+    "sender_role": "engineer",
+    "timestamp": "2025-05-04T06:10:53.275454+00:00",
+    "content": "محدودیت اردیبهشت",
+    "read_by_engineer": true,
+    "read_by_admin": false
+  },
+  {
+    "message_id": "6137a520-fb35-4d95-b34e-daaa00d5bc7c",
+    "engineer_name": "نوبخت",
+    "sender_role": "engineer",
+    "timestamp": "2025-05-04T06:12:25.724595+00:00",
+    "content": "محدودیت تا بیستم خرداد",
+    "read_by_engineer": true,
+    "read_by_admin": false
+  },
+  {
+    "message_id": "6b9e56ec-fa13-4baa-8115-9ced479120ee",
+    "engineer_name": "شریفی",
+    "sender_role": "engineer",
+    "timestamp": "2025-05-04T10:52:04.287051+00:00",
+    "content": "سلام \nلطفا\nروز 25 اردیبهشت-شیفت سوم نودال\nروز 31 اردیبهشت-شیفت 1پرس شیفت 2 و 3 نودال",
+    "read_by_engineer": true,
+    "read_by_admin": false
+  },
+  {
+    "message_id": "309b30f6-8a43-4965-a686-806e6550ee9e",
+    "engineer_name": "شریفی",
+    "sender_role": "engineer",
+    "timestamp": "2025-05-04T10:58:48.265818+00:00",
+    "content": "2 خرداد\nشیفت یک هیسپان\nشیفت 2 و 3 نودال\n7 خرداد\nشیفت یک هیسپان\nشیفت 2 و 3 نودال\n9 خرداد\nشیفت 2 پرس\nشیفت 3 نودال\n18 خرداد\nشیفت 3 نودال\n20 خرداد\nشیفت 3 نودال",
+    "read_by_engineer": true,
+    "read_by_admin": false
+  },
+  {
+    "message_id": "83ce4680-e7bb-4dc0-97d4-a71ab547192f",
+    "engineer_name": "نظربیگی",
+    "sender_role": "engineer",
+    "timestamp": "2025-05-04T19:15:00.260767+00:00",
+    "content": "سلام و عرض خسته نباشید\nاگر امکانش بشه شنبه یا یکشنبه شیفت ۱ و ۲ باهم برای بنده بچینید خوب هستش\nفقط ممنون میشم اگر دوشیفت برام چیدید شیفت های قبلی یا بعدی باهاش حداقل یک روز فاصله داشته باشن\nتشکر🙏",
+    "read_by_engineer": true,
+    "read_by_admin": false
+  },
+  {
+    "message_id": "6d83ab42-883e-4b51-be52-e18d50c6cf96",
+    "engineer_name": "نظربیگی",
+    "sender_role": "engineer",
+    "timestamp": "2025-05-04T19:15:57.008376+00:00",
+    "content": "سلام و عرض خسته نباشید\nاگر امکانش بشه شنبه یا یکشنبه شیفت ۱ و ۲ باهم برای بنده بچینید خوب هستش\nفقط ممنون میشم اگر دوشیفت برام چیدید شیفت های قبلی یا بعدی باهاش حداقل یک روز فاصله داشته باشن\nتشکر🙏",
+    "read_by_engineer": true,
     "read_by_admin": false
   }
 ]

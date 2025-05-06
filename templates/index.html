@@ -28,6 +28,9 @@
             <button id="btnGenerate" class="btn btn-success me-2">
                 <i class="fas fa-file-excel me-1"></i> تولید اکسل
             </button>
+            <button id="btnGenerateReport" class="btn btn-info me-2">
+                <i class="fas fa-chart-bar me-1"></i> گزارش
+            </button>
             <a href="/excel-generator" class="btn btn-outline-success">
                 <i class="fas fa-file-excel me-1"></i> مولد اکسل
             </a>
@@ -140,6 +143,27 @@
                         </button>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Report Modal -->
+<div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="reportModalLabel"><i class="fas fa-chart-bar me-2"></i> گزارش شیفت مهندسان</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="بستن"></button>
+            </div>
+            <div class="modal-body">
+                <div id="reportTableContainer">
+                    <!-- Report table will be inserted here by JavaScript -->
+                    <p class="text-center">درحال تولید گزارش...</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">بستن</button>
             </div>
         </div>
     </div>

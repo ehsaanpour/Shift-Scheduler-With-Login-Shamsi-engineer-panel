@@ -159,6 +159,12 @@ function setupEventListeners() {
     if (saveLimitationsBtn) {
         saveLimitationsBtn.addEventListener('click', window.saveLimitations);
     }
+
+    // New: Event listener for Generate Report button
+    const generateReportBtn = document.getElementById('btnGenerateReport');
+    if (generateReportBtn) {
+        generateReportBtn.addEventListener('click', generateShiftReport);
+    }
 }
 
 // Load engineers from API
@@ -1407,6 +1413,120 @@ function applyPattern() {
     // Reset button state
     applyBtn.innerHTML = originalText;
     applyBtn.disabled = false;
+}
+
+// New: Function to generate and display the shift report
+async function generateShiftReport() {
+    const reportModal = new bootstrap.Modal(document.getElementById('reportModal'));
+    const reportTableContainer = document.getElementById('reportTableContainer');
+    reportTableContainer.innerHTML = '<p class="text-center">درحال تولید گزارش...</p>'; // Show loading message
+    reportModal.show();
+
+    const year = parseInt(document.getElementById('yearSelect').value);
+    const month = parseInt(document.getElementById('monthSelect').value);
+
+    if (!window.engineers || window.engineers.length === 0) {
+        reportTableContainer.innerHTML = '<p class="text-center text-danger">لیست مهندسان بارگذاری نشده است. لطفا صفحه را رفرش کنید.</p>';
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/schedule?year=${year}&month=${month}`);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch schedule: ${response.statusText}`);
+        }
+        const scheduleData = await response.json();
+        const schedule = scheduleData || {}; // Corrected: Use scheduleData directly
+
+        const reportData = {};
+
+        // Initialize reportData for all engineers
+        window.engineers.forEach(eng => {
+            reportData[eng.name] = {
+                totalShifts: 0,
+                shift1Count: 0,
+                shift2Count: 0,
+                shift3Count: 0,
+                thursdayFridayShifts: 0,
+                nodalShifts: 0
+            };
+        });
+
+        // Process the schedule
+        for (const workplace in schedule) {
+            for (const dayStr in schedule[workplace]) {
+                const day = parseInt(dayStr);
+                for (const shiftType in schedule[workplace][dayStr]) {
+                    const engineerName = schedule[workplace][dayStr][shiftType];
+                    if (engineerName && reportData[engineerName]) {
+                        reportData[engineerName].totalShifts++;
+
+                        if (shiftType === 'shift1') reportData[engineerName].shift1Count++;
+                        else if (shiftType === 'shift2') reportData[engineerName].shift2Count++;
+                        else if (shiftType === 'shift3') reportData[engineerName].shift3Count++;
+
+                        if (workplace.toLowerCase().includes('nodal')) { // Assuming 'Nodal' might have variations
+                            reportData[engineerName].nodalShifts++;
+                        }
+
+                        // Determine day of the week
+                        // jalaali.toGregorian expects numbers for year, month, day
+                        const gregorianDate = jalaali.toGregorian(year, month, day);
+                        const dateObj = new Date(gregorianDate.gy, gregorianDate.gm - 1, gregorianDate.gd);
+                        const dayOfWeek = dateObj.getDay(); // 0 (Sun) - 6 (Sat)
+
+                        // Thursday is 4, Friday is 5
+                        if (dayOfWeek === 4 || dayOfWeek === 5) {
+                            reportData[engineerName].thursdayFridayShifts++;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Generate HTML table
+        let tableHtml = `
+            <table class="table table-bordered table-striped table-sm">
+                <thead class="table-light">
+                    <tr>
+                        <th>نام مهندس</th>
+                        <th>کل شیفت‌ها</th>
+                        <th>شیفت ۱</th>
+                        <th>شیفت ۲</th>
+                        <th>شیفت ۳</th>
+                        <th>شیفت‌های پنج‌شنبه و جمعه</th>
+                        <th>شیفت‌های نودال</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        for (const engineerName in reportData) {
+            const data = reportData[engineerName];
+            tableHtml += `
+                <tr>
+                    <td>${engineerName}</td>
+                    <td>${data.totalShifts}</td>
+                    <td>${data.shift1Count}</td>
+                    <td>${data.shift2Count}</td>
+                    <td>${data.shift3Count}</td>
+                    <td>${data.thursdayFridayShifts}</td>
+                    <td>${data.nodalShifts}</td>
+                </tr>
+            `;
+        }
+
+        tableHtml += `
+                </tbody>
+            </table>
+        `;
+
+        reportTableContainer.innerHTML = tableHtml;
+
+    } catch (error) {
+        console.error('Error generating report:', error);
+        reportTableContainer.innerHTML = `<p class="text-center text-danger">خطا در تولید گزارش: ${error.message}</p>`;
+    }
 }
 
 // Make functions available globally
