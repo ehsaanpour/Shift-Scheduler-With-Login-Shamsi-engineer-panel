@@ -5,7 +5,92 @@
       "Studio Hispan",
       "Studio Press"
     ],
-    "limitations": {},
+    "limitations": {
+      "1404": {
+        "2": {
+          "21": [
+            "shift1"
+          ],
+          "22": [
+            "shift2",
+            "shift3"
+          ],
+          "23": [
+            "shift1"
+          ],
+          "24": [
+            "shift2"
+          ],
+          "27": [
+            "shift2",
+            "shift3"
+          ],
+          "28": [
+            "shift1"
+          ],
+          "29": [
+            "shift2",
+            "shift3"
+          ],
+          "30": [
+            "shift1"
+          ]
+        },
+        "3": {
+          "2": [
+            "shift2"
+          ],
+          "3": [
+            "shift2",
+            "shift3"
+          ],
+          "4": [
+            "shift1"
+          ],
+          "5": [
+            "shift2",
+            "shift3"
+          ],
+          "6": [
+            "shift1"
+          ],
+          "8": [
+            "shift2"
+          ],
+          "10": [
+            "shift2",
+            "shift3"
+          ],
+          "11": [
+            "shift1"
+          ],
+          "12": [
+            "shift2",
+            "shift3"
+          ],
+          "13": [
+            "shift1"
+          ],
+          "15": [
+            "shift2"
+          ],
+          "17": [
+            "shift2",
+            "shift3"
+          ],
+          "18": [
+            "shift1"
+          ],
+          "19": [
+            "shift2",
+            "shift3"
+          ],
+          "20": [
+            "shift1"
+          ]
+        }
+      }
+    },
     "minShifts": 10,
     "maxShifts": 30
   },
@@ -1438,6 +1523,96 @@
             "shift2",
             "shift3"
           ]
+        },
+        "3": {
+          "1": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "2": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "3": [
+            "shift1"
+          ],
+          "4": [
+            "shift1"
+          ],
+          "5": [
+            "shift1"
+          ],
+          "6": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "7": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "8": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "9": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "10": [
+            "shift1"
+          ],
+          "11": [
+            "shift1"
+          ],
+          "12": [
+            "shift1"
+          ],
+          "13": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "14": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "15": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "16": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "17": [
+            "shift1",
+            "shift2"
+          ],
+          "18": [
+            "shift1"
+          ],
+          "19": [
+            "shift1"
+          ],
+          "20": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "21": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ]
         }
       }
     },
@@ -1451,7 +1626,157 @@
       "Studio Press",
       "Nodal"
     ],
-    "limitations": {},
+    "limitations": {
+      "1404": {
+        "2": {
+          "21": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "22": [
+            "shift1",
+            "shift3"
+          ],
+          "23": [
+            "shift1"
+          ],
+          "24": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "25": [
+            "shift1",
+            "shift3"
+          ],
+          "26": [
+            "shift1",
+            "shift2"
+          ],
+          "27": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "28": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "29": [
+            "shift1",
+            "shift3"
+          ],
+          "30": [
+            "shift1"
+          ],
+          "31": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ]
+        },
+        "3": {
+          "1": [
+            "shift1",
+            "shift3"
+          ],
+          "2": [
+            "shift1",
+            "shift2"
+          ],
+          "3": [
+            "shift1"
+          ],
+          "4": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "5": [
+            "shift1",
+            "shift3"
+          ],
+          "6": [
+            "shift1"
+          ],
+          "7": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "8": [
+            "shift1",
+            "shift3"
+          ],
+          "9": [
+            "shift1",
+            "shift2"
+          ],
+          "10": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "11": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "12": [
+            "shift1",
+            "shift3"
+          ],
+          "13": [
+            "shift1"
+          ],
+          "14": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "15": [
+            "shift1",
+            "shift3"
+          ],
+          "16": [
+            "shift1",
+            "shift2"
+          ],
+          "17": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "18": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "19": [
+            "shift1",
+            "shift3"
+          ],
+          "20": [
+            "shift1"
+          ],
+          "21": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "22": [
+            "shift1",
+            "shift3"
+          ],
+          "23": [
+            "shift1",
+            "shift2"
+          ]
+        }
+      }
+    },
     "minShifts": 10,
     "maxShifts": 30
   },
@@ -1581,7 +1906,24 @@
       "Studio Press",
       "Nodal"
     ],
-    "limitations": {},
+    "limitations": {
+      "1404": {
+        "2": {
+          "26": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ]
+        },
+        "3": {
+          "9": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ]
+        }
+      }
+    },
     "minShifts": 10,
     "maxShifts": 30
   },
@@ -1591,7 +1933,229 @@
       "Studio Hispan",
       "Studio Press"
     ],
-    "limitations": {},
+    "limitations": {
+      "1404": {
+        "2": {
+          "20": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "21": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "22": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "23": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "24": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "25": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "26": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "27": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "28": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "29": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "30": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "31": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ]
+        },
+        "3": {
+          "1": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "2": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "3": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "4": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "5": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "6": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "7": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "8": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "9": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "10": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "11": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "12": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "13": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "14": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "15": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "16": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "17": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "18": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "19": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "20": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "21": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "22": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "23": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "24": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "25": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "26": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "27": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "28": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "29": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "30": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "31": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ]
+        }
+      }
+    },
     "minShifts": 10,
     "maxShifts": 30
   },
@@ -1605,73 +2169,145 @@
     "limitations": {
       "1404": {
         "2": {
+          "20": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
           "21": [
-            "shift1"
+            "shift2",
+            "shift3"
           ],
           "22": [
-            "shift3"
+            "shift1",
+            "shift2"
           ],
           "23": [
-            "shift1"
+            "shift2",
+            "shift3"
+          ],
+          "24": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "25": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "26": [
+            "shift1",
+            "shift2",
+            "shift3"
           ],
           "27": [
-            "shift3"
+            "shift1",
+            "shift2"
           ],
           "28": [
-            "shift1"
-          ],
-          "29": [
+            "shift2",
             "shift3"
           ],
+          "29": [
+            "shift1",
+            "shift2"
+          ],
           "30": [
-            "shift1"
+            "shift2",
+            "shift3"
+          ],
+          "31": [
+            "shift1",
+            "shift2",
+            "shift3"
           ]
         },
         "3": {
+          "1": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
           "2": [
-            "shift1"
+            "shift2",
+            "shift3"
           ],
           "3": [
-            "shift3"
+            "shift1",
+            "shift2"
           ],
           "4": [
-            "shift1"
+            "shift2",
+            "shift3"
           ],
           "5": [
-            "shift3"
+            "shift1",
+            "shift2"
           ],
           "6": [
-            "shift1"
+            "shift2",
+            "shift3"
+          ],
+          "7": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "8": [
+            "shift1",
+            "shift2",
+            "shift3"
           ],
           "9": [
-            "shift1"
+            "shift2",
+            "shift3"
           ],
           "10": [
-            "shift3"
+            "shift1",
+            "shift2"
           ],
           "11": [
-            "shift1"
+            "shift2",
+            "shift3"
           ],
           "12": [
-            "shift3"
+            "shift1",
+            "shift2"
           ],
           "13": [
-            "shift1"
+            "shift2",
+            "shift3"
+          ],
+          "14": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "15": [
+            "shift1",
+            "shift2",
+            "shift3"
           ],
           "16": [
-            "shift1"
+            "shift2",
+            "shift3"
           ],
           "17": [
-            "shift3"
+            "shift1",
+            "shift2"
           ],
           "18": [
-            "shift1"
-          ],
-          "19": [
+            "shift2",
             "shift3"
           ],
+          "19": [
+            "shift1",
+            "shift2"
+          ],
           "20": [
-            "shift1"
+            "shift2",
+            "shift3"
           ]
         }
       }
