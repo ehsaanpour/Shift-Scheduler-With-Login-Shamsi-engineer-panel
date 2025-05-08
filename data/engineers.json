@@ -97,8 +97,7 @@
   {
     "name": "علیرضائی",
     "workplaces": [
-      "Studio Hispan",
-      "Studio Press"
+      "Nodal"
     ],
     "limitations": {
       "1404": {
@@ -1687,7 +1686,9 @@
             "shift2"
           ],
           "3": [
-            "shift1"
+            "shift1",
+            "shift2",
+            "shift3"
           ],
           "4": [
             "shift1",
@@ -2312,6 +2313,17 @@
         }
       }
     },
+    "minShifts": 10,
+    "maxShifts": 30
+  },
+  {
+    "name": "رودی",
+    "workplaces": [
+      "Studio Hispan",
+      "Studio Press",
+      "Nodal"
+    ],
+    "limitations": {},
     "minShifts": 10,
     "maxShifts": 30
   }

@@ -967,10 +967,45 @@ function autoAssignEngineers() {
                 // Assign the engineer with highest priority
                 if (sortedEngineers.length > 0) {
                     const assignedEngineer = sortedEngineers[0];
-                    selectElem.value = assignedEngineer.name;
-                    engineerAssignments[assignedEngineer.name]++;
-                    totalAssignments++;
-                    console.log(`Assigned ${assignedEngineer.name} to ${workplace.name}, day ${day}, ${shiftKey}`);
+
+                    // --- BEGIN BUG FIX for double booking ---
+                    let isAlreadyAssignedElsewhere = false;
+                    const currentDayStr = String(day); // Day as string for data attribute comparison
+                    const currentShiftKey = `shift${shift}`; // Shift key, e.g., "shift1"
+                    const currentWorkplaceName = workplace.name;
+
+                    // Query all engineer select elements in the document
+                    document.querySelectorAll('.engineer-select').forEach(otherSelect => {
+                        const otherSelectWorkplace = otherSelect.dataset.workplace;
+                        const otherSelectDay = otherSelect.dataset.day;
+                        const otherSelectShift = otherSelect.dataset.shift;
+
+                        // Check if this 'otherSelect' is for the same day and shift, but a DIFFERENT workplace
+                        if (otherSelectDay === currentDayStr &&
+                            otherSelectShift === currentShiftKey &&
+                            otherSelectWorkplace !== currentWorkplaceName) {
+                            
+                            // Check if the currently considered 'assignedEngineer' is selected in this 'otherSelect'
+                            if (otherSelect.value === assignedEngineer.name) {
+                                isAlreadyAssignedElsewhere = true;
+                                console.log(`Conflict: Engineer ${assignedEngineer.name} is already assigned to ${otherSelectWorkplace} on day ${currentDayStr}, ${currentShiftKey}. Cannot assign to ${currentWorkplaceName}.`);
+                            }
+                        }
+                    });
+
+                    if (!isAlreadyAssignedElsewhere) {
+                        // No conflict, proceed with assignment
+                        selectElem.value = assignedEngineer.name;
+                        engineerAssignments[assignedEngineer.name]++;
+                        totalAssignments++;
+                        console.log(`Assigned ${assignedEngineer.name} to ${currentWorkplaceName}, day ${day}, ${currentShiftKey}`);
+                    } else {
+                        // Conflict found, skip assignment for this engineer in this slot
+                        console.log(`Skipped assignment of ${assignedEngineer.name} to ${currentWorkplaceName}, day ${day}, ${currentShiftKey} due to existing assignment elsewhere.`);
+                        // NOTE: This means the slot might remain empty if this was the only/best candidate.
+                        // Further logic could be added here to try the next engineer in sortedEngineers if available.
+                    }
+                    // --- END BUG FIX ---
                 }
             }
         }

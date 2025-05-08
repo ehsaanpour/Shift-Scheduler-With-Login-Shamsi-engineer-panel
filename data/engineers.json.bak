@@ -97,8 +97,7 @@
   {
     "name": "علیرضائی",
     "workplaces": [
-      "Studio Hispan",
-      "Studio Press"
+      "Nodal"
     ],
     "limitations": {
       "1404": {
@@ -2224,54 +2223,105 @@
           ]
         },
         "3": {
+          "1": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
           "2": [
-            "shift1"
+            "shift2",
+            "shift3"
           ],
           "3": [
-            "shift3"
+            "shift1",
+            "shift2"
           ],
           "4": [
-            "shift1"
+            "shift2",
+            "shift3"
           ],
           "5": [
-            "shift3"
+            "shift1",
+            "shift2"
           ],
           "6": [
-            "shift1"
+            "shift2",
+            "shift3"
+          ],
+          "7": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "8": [
+            "shift1",
+            "shift2",
+            "shift3"
           ],
           "9": [
-            "shift1"
+            "shift2",
+            "shift3"
           ],
           "10": [
-            "shift3"
+            "shift1",
+            "shift2"
           ],
           "11": [
-            "shift1"
+            "shift2",
+            "shift3"
           ],
           "12": [
-            "shift3"
+            "shift1",
+            "shift2"
           ],
           "13": [
-            "shift1"
+            "shift2",
+            "shift3"
+          ],
+          "14": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "15": [
+            "shift1",
+            "shift2",
+            "shift3"
           ],
           "16": [
-            "shift1"
+            "shift2",
+            "shift3"
           ],
           "17": [
-            "shift3"
+            "shift1",
+            "shift2"
           ],
           "18": [
-            "shift1"
-          ],
-          "19": [
+            "shift2",
             "shift3"
           ],
+          "19": [
+            "shift1",
+            "shift2"
+          ],
           "20": [
-            "shift1"
+            "shift2",
+            "shift3"
           ]
         }
       }
     },
+    "minShifts": 10,
+    "maxShifts": 30
+  },
+  {
+    "name": "رودی",
+    "workplaces": [
+      "Studio Hispan",
+      "Studio Press",
+      "Nodal"
+    ],
+    "limitations": {},
     "minShifts": 10,
     "maxShifts": 30
   }

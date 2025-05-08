@@ -326,3 +326,29 @@ select.consecutive-days-warning {
 @media print {
 
 }
+
+.three-shift3-warning {
+    border: 2px solid #ff5722; /* Deep Orange border for three consecutive shift 3s */
+    background-color: #fff3e0; /* Light orange background */
+}
+
+/* New style for cross-workplace conflicts */
+.cross-workplace-conflict-warning {
+    border: 2px solid #3d0d10 !important; /* Dark reddish-brown border */
+    background-color: #3d0d10 !important; /* Dark reddish-brown background */
+    color: #FFFFFF !important; /* White text for visibility */
+}
+
+/* Ensure select text remains dark for other warnings if not overridden by conflict */
+.three-shifts-warning,
+.consecutive-days-warning {
+    color: #212529; /* Default dark text color */
+}
+
+/* Adjustments for select elements for better visibility of warnings */
+select.form-select.three-shifts-warning,
+select.form-select.consecutive-days-warning,
+select.form-select.three-shift3-warning,
+select.form-select.cross-workplace-conflict-warning {
+    padding-right: 1.75rem; /* Ensure space for Bootstrap's dropdown arrow if it gets covered */
+}

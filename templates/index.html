@@ -1228,37 +1228,48 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Create a map to track each engineer's shifts by day, reading from DOM
         const engineerShifts = {};
-        
+        const allDomAssignments = []; // <-- NEW: For easier conflict checking
+
         selectElements.forEach(select => {
             const engineer = select.value;
-            if (!engineer) return; // Skip empty selections
-            
-            const day = parseInt(select.dataset.day);
-            const shift = parseInt(select.dataset.shift.replace('shift', ''));
-            const workplace = select.dataset.workplace;
-            
-            const dayStr = String(day);
-            
-            // Initialize engineer data structure if needed
-            if (!engineerShifts[engineer]) {
-                engineerShifts[engineer] = {};
+            // if (!engineer) return; // Skip empty selections <-- Original place, moved down
+
+            const dayVal = parseInt(select.dataset.day);
+            const shiftVal = parseInt(select.dataset.shift.replace('shift', ''));
+            const workplaceVal = select.dataset.workplace;
+
+            if (engineer) { // Only process and store if an engineer is selected
+                // Populate engineerShifts (existing logic)
+                const dayStr = String(dayVal);
+                if (!engineerShifts[engineer]) {
+                    engineerShifts[engineer] = {};
+                }
+                if (!engineerShifts[engineer][dayStr]) {
+                    engineerShifts[engineer][dayStr] = [];
+                }
+                engineerShifts[engineer][dayStr].push({
+                    workplace: workplaceVal,
+                    shift: shiftVal
+                });
+
+                // Populate allDomAssignments (new logic)
+                allDomAssignments.push({
+                    engineer: engineer,
+                    day: dayVal,
+                    shift: shiftVal,
+                    workplace: workplaceVal,
+                    element: select
+                });
             }
-            if (!engineerShifts[engineer][dayStr]) {
-                engineerShifts[engineer][dayStr] = [];
-            }
-            
-            // Store the shift info
-            engineerShifts[engineer][dayStr].push({
-                workplace,
-                shift
-            });
         });
         
         console.log("Collected engineer shifts data from DOM:", Object.keys(engineerShifts).length, "engineers");
-        
+        console.log("Total DOM assignments collected for conflict check:", allDomAssignments.length);
+
         // Reset all highlights first
         selectElements.forEach(select => {
             select.classList.remove('three-shifts-warning', 'consecutive-days-warning', 'three-shift3-warning');
+            select.classList.remove('cross-workplace-conflict-warning'); // <-- NEW: Reset new class
         });
         
         // Apply highlights for challenging patterns based on the collected data
@@ -1322,7 +1333,31 @@ document.addEventListener('DOMContentLoaded', function() {
                     highlightEngineerShift(engineer, day + 2, 3, 'three-shift3-warning');
                 }
             }
+        } // End of existing loop: for (const engineer in engineerShifts)
+
+        // --- BEGIN: New Cross-Workplace Conflict Check ---
+        console.log("Checking for cross-workplace conflicts...");
+        // We use allDomAssignments which already filters for selected engineers
+
+        for (let i = 0; i < allDomAssignments.length; i++) {
+            for (let j = i + 1; j < allDomAssignments.length; j++) {
+                const s1 = allDomAssignments[i];
+                const s2 = allDomAssignments[j];
+
+                // Check if engineer, day, and shift are the same, but workplace is different
+                if (s1.engineer === s2.engineer &&
+                    s1.day === s2.day &&
+                    s1.shift === s2.shift &&
+                    s1.workplace !== s2.workplace) {
+                    
+                    console.log(`Conflict: ${s1.engineer} on day ${s1.day}, shift ${s1.shift} in ${s1.workplace} and ${s2.workplace}`);
+                    s1.element.classList.add('cross-workplace-conflict-warning');
+                    s2.element.classList.add('cross-workplace-conflict-warning');
+                }
+            }
         }
+        console.log("Finished checking for cross-workplace conflicts.");
+        // --- END: New Cross-Workplace Conflict Check ---
     }
     
     /**
