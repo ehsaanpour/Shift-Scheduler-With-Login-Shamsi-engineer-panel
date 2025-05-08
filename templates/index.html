@@ -141,6 +141,9 @@
                         <button id="btnAutoAssign" class="btn btn-warning me-2">
                             <i class="fas fa-magic me-1"></i> تخصیص خودکار مهندسان
                         </button>
+                        <button id="btnOverallShiftStatus" class="btn btn-success me-2">
+                            <i class="fas fa-tasks me-1"></i> وضعیت کلی شیفت‌ها
+                        </button>
                         <button id="btnSaveSchedule" class="btn btn-primary">
                             <i class="fas fa-save me-1"></i> ذخیره برنامه
                         </button>
@@ -1843,6 +1846,182 @@ document.addEventListener('DOMContentLoaded', function() {
         const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
         return String(num).replace(/[0-9]/g, (digit) => persianDigits[parseInt(digit)]);
     };
+
+    // --- NEW FUNCTION: Show Overall Shift Status ---
+    function showOverallShiftStatusPopup() {
+        const year = parseInt(document.getElementById('yearSelect').value);
+        const month = parseInt(document.getElementById('monthSelect').value);
+
+        if (!engineers || engineers.length === 0) {
+            alert("مهندسی بارگذاری نشده است.");
+            return;
+        }
+
+        // Collect all current assignments from the DOM
+        const assignments = {}; // Structure: assignments[day][shift][engineer] = workplace
+        document.querySelectorAll('.engineer-select').forEach(select => {
+            if (select.value) {
+                const day = select.dataset.day;
+                const shift = select.dataset.shift;
+                const engineer = select.value;
+                const workplace = select.dataset.workplace;
+
+                if (!assignments[day]) assignments[day] = {};
+                if (!assignments[day][shift]) assignments[day][shift] = {};
+                assignments[day][shift][engineer] = workplace;
+            }
+        });
+
+        // Workplace color mapping
+        const workplaceColors = {
+            "Studio Press": "#ff77bc",
+            "Studio Hispan": "#82f3cc",
+            "Nodal": "#ffc97d",
+            "Engineer Room": "#c0c6f4"
+            // Add other workplaces and their colors if needed
+        };
+        const defaultCellColor = "#ffffff"; // White for unassigned
+
+        const daysInMonth = jalaali.jalaaliMonthLength(year, month);
+        let popupHTML = `
+            <html>
+            <head>
+                <title>وضعیت کلی شیفت‌ها - ${PERSIAN_MONTH_NAMES[month]} ${year}</title>
+                <style>
+                    body { font-family: Arial, sans-serif; direction: rtl; padding: 10px; margin: 0; }
+                    h1 { text-align: center; color: #333; margin-bottom: 15px; font-size: 1.5em; }
+                    .status-container { 
+                        display: flex; 
+                        flex-direction: row; 
+                        flex-wrap: nowrap; 
+                        overflow-x: auto; 
+                        border: 1px solid #ccc; 
+                        padding: 5px; 
+                        background-color: #f9f9f9; 
+                    }
+                    .engineer-column { 
+                        padding: 0 5px; 
+                        flex-shrink: 0; 
+                    }
+                    .engineer-column:not(:first-child) { 
+                        border-right: 1px solid #ddd; 
+                        padding-right: 10px; 
+                        margin-right: 5px; 
+                    }
+                    .engineer-column h4 { 
+                        text-align: center; 
+                        margin-top: 0;
+                        margin-bottom: 5px; 
+                        background-color: #e9e9e9; 
+                        padding: 5px; 
+                        border-radius: 3px; 
+                        font-size: 1em;
+                        white-space: nowrap;
+                    }
+                    table { 
+                        width: auto; 
+                        border-collapse: collapse; 
+                        font-size: 0.85em; 
+                        margin-bottom: 0; 
+                    }
+                    th, td { 
+                        border: 1px solid #ccc; 
+                        padding: 4px 6px;
+                        text-align: center; 
+                        min-width: 50px; /* Adjust min-width if needed */
+                        white-space: nowrap; 
+                        vertical-align: middle; /* Center content vertically */
+                        height: 30px; /* Fixed height for cells */
+                    }
+                    th { background-color: #f0f0f0; font-weight: bold; }
+                    .day-label { font-weight: bold; font-size: 0.9em; } 
+                    .day-name-small { font-size: 0.8em; color: #555; } 
+                    /* Legend Styles */
+                    .legend { margin-top: 20px; padding: 10px; border-top: 1px solid #ccc; text-align: right; font-size: 0.9em; }
+                    .legend-item { display: inline-block; margin-left: 15px; /* RTL margin */ margin-right: 0; }
+                    .legend-color-box { display: inline-block; width: 15px; height: 15px; border: 1px solid #666; vertical-align: middle; margin-left: 5px; /* RTL margin */ margin-right: 0; }
+                </style>
+            </head>
+            <body>
+                <h1>وضعیت کلی شیفت‌ها برای ${PERSIAN_MONTH_NAMES[month]} ${year}</h1>
+                <div class="status-container">
+        `;
+
+        engineers.forEach(engineer => {
+            popupHTML += `<div class="engineer-column"><h4>${engineer.name}</h4>`;
+            popupHTML += `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>روز</th>
+                            <th>شیفت ۱</th>
+                            <th>شیفت ۲</th>
+                            <th>شیفت ۳</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const gregorianDate = jalaali.toGregorian(year, month, day);
+                const dateObj = new Date(gregorianDate.gy, gregorianDate.gm - 1, gregorianDate.gd);
+                const dayOfWeek = (dateObj.getDay() + 1) % 7; // 0=Sat, 1=Sun ...
+                
+                popupHTML += `<tr><td class="day-label">${toPersianDigits(day)}<br><small class="day-name-small">(${PERSIAN_DAY_NAMES[dayOfWeek]})</small></td>`;
+
+                for (let shiftNum = 1; shiftNum <= 3; shiftNum++) {
+                    const shiftKey = `shift${shiftNum}`;
+                    let cellContent = '-';
+                    let cellColor = defaultCellColor;
+
+                    // Check if this engineer is assigned to this specific day and shift
+                    if (assignments[String(day)] && 
+                        assignments[String(day)][shiftKey] && 
+                        assignments[String(day)][shiftKey][engineer.name]) {
+                        
+                        const assignedWorkplace = assignments[String(day)][shiftKey][engineer.name];
+                        cellColor = workplaceColors[assignedWorkplace] || defaultCellColor; // Use mapped color or default
+                        // You might want to display workplace name or abbreviation instead of color code
+                        cellContent = ''; // Clear the dash, cell color indicates assignment
+                    }
+                    
+                    popupHTML += `<td style="background-color: ${cellColor};">${cellContent}</td>`;
+                }
+                popupHTML += `</tr>`;
+            }
+            popupHTML += `</tbody></table></div>`; // Close engineer-column div
+        });
+
+        popupHTML += `        </div> <!-- Close status-container -->`;
+        
+        // --- Add Legend ---
+        popupHTML += `<div class="legend"><strong>راهنما:</strong>`;
+        for (const workplace in workplaceColors) {
+            if (Object.hasOwnProperty.call(workplaceColors, workplace)) {
+                const color = workplaceColors[workplace];
+                popupHTML += `<span class="legend-item"><span class="legend-color-box" style="background-color: ${color};"></span> ${workplace}</span>`;
+            }
+        }
+        popupHTML += `</div>`;
+        // --- End Legend ---
+        
+        popupHTML += `</body></html>`;
+
+        const popupWindow = window.open('', '_blank', 'width=1000,height=700,scrollbars=yes,resizable=yes');
+        if (popupWindow) {
+            popupWindow.document.open();
+            popupWindow.document.write(popupHTML);
+            popupWindow.document.close();
+            popupWindow.focus();
+        }
+    }
+
+    // Event listener for the new Overall Shift Status button
+    const btnOverallShiftStatus = document.getElementById('btnOverallShiftStatus');
+    if (btnOverallShiftStatus) {
+        btnOverallShiftStatus.addEventListener('click', showOverallShiftStatusPopup);
+    }
+    // --- END NEW FUNCTION SECTION ---
 
 });
 </script>
