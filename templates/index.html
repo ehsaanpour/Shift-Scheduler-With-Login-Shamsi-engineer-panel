@@ -91,38 +91,30 @@
                     </div>
                 </div>
             </div>
-            <div class="card-body p-0">
-                <ul class="nav nav-tabs nav-fill" id="workplaceTabs" role="tablist">
+            <div class="card-body p-0"> 
+                <!-- Remove Tab Navigation and Tab Content -->
+                <!-- <ul class="nav nav-tabs nav-fill" id="workplaceTabs" role="tablist"> ... </ul> -->
+                <!-- <div class="tab-content p-3" id="workplaceTabContent"> ... </div> -->
+
+                <!-- NEW: Horizontal Flex Container -->
+                <div id="horizontal-schedule-container" class="horizontal-schedule-container">
                     {% for workplace in workplaces %}
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link {% if loop.first %}active{% endif %}" 
-                                id="tab-{{ workplace|replace(' ', '-')|lower }}" 
-                                data-bs-toggle="tab" 
-                                data-bs-target="#content-{{ workplace|replace(' ', '-')|lower }}" 
-                                type="button" 
-                                role="tab">
-                            {{ workplace }}
-                        </button>
-                    </li>
-                    {% endfor %}
-                </ul>
-                <div class="tab-content p-3" id="workplaceTabContent">
-                    {% for workplace in workplaces %}
-                    <div class="tab-pane fade {% if loop.first %}show active{% endif %}" 
-                         id="content-{{ workplace|replace(' ', '-')|lower }}" 
-                         role="tabpanel">
-                        <div class="d-flex justify-content-end mb-3">
-                            <button class="btn btn-sm btn-outline-info import-pattern-btn" 
+                    <div class="workplace-column">
+                        <h4 class="workplace-title text-center mb-2">{{ workplace }}</h4>
+                        <div class="d-flex justify-content-end mb-2">
+                             <button class="btn btn-sm btn-outline-info import-pattern-btn" 
                                     data-workplace="{{ workplace }}">
                                 <i class="fas fa-file-import me-1"></i> وارد کردن الگو
                             </button>
                         </div>
                         <div id="schedule-{{ workplace|replace(' ', '-')|lower }}">
-                            <!-- Schedule table will be generated here -->
+                            <!-- Schedule table will be generated here by JS -->
                         </div>
                     </div>
                     {% endfor %}
                 </div>
+                <!-- END: Horizontal Flex Container -->
+
             </div>
             <div class="card-footer text-end">
                 <div class="row align-items-center">

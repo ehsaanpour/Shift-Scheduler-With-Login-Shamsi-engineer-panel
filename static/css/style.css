@@ -352,3 +352,51 @@ select.form-select.three-shift3-warning,
 select.form-select.cross-workplace-conflict-warning {
     padding-right: 1.75rem; /* Ensure space for Bootstrap's dropdown arrow if it gets covered */
 }
+
+/* Styles for Horizontal Schedule Layout */
+.horizontal-schedule-container {
+    display: flex;
+    flex-direction: row; /* Arrange columns horizontally */
+    flex-wrap: nowrap; /* Prevent wrapping to new lines */
+    overflow-x: auto; /* Enable horizontal scrolling */
+    background-color: #f8f9fa; /* Light background for the scrollable area */
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+}
+
+.workplace-column {
+    flex: 0 0 auto; /* Prevent columns from growing or shrinking, base width on content */
+    padding: 10px;
+    min-width: 350px; /* Minimum width for a column, adjust as needed */
+    /* Add a border to the right (or left in RTL) of all columns except the last one */
+}
+
+/* For LTR direction (default) */
+/* .workplace-column:not(:last-child) {
+    border-right: 1px solid #ccc;
+    margin-right: 5px; 
+} */
+
+/* For RTL direction (assuming the page direction is RTL) */
+.workplace-column:not(:first-child) {
+    border-right: 1px solid #ccc; /* Use border-right for separation in RTL */
+    padding-right: 15px;
+    margin-right: 5px;
+}
+
+.workplace-title {
+    font-weight: bold;
+    color: #495057;
+    background-color: #e9ecef;
+    padding: 5px 10px;
+    border-radius: 4px;
+    margin-bottom: 10px !important; /* Ensure spacing */
+}
+
+/* Ensure tables within columns don't have extra bottom margin */
+.workplace-column .table {
+    margin-bottom: 0;
+}
+
+/* Ensure other styles don't conflict */
+/* ... */

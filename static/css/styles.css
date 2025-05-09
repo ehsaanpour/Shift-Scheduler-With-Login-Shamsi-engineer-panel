@@ -12,4 +12,25 @@
 .three-shift3-warning {
     background-color: #fff3cd !important; /* Light yellow */
     color: #856404 !important;
+}
+
+/* Styles for horizontal schedule display */
+.horizontal-schedule-container {
+    display: flex;
+    flex-direction: row; /* Align items in a row */
+    overflow-x: auto;   /* Allow horizontal scrolling if content overflows */
+    align-items: flex-start; /* Align items to the start of the cross axis */
+    gap: 1rem; /* Add some space between columns */
+}
+
+.workplace-column {
+    flex: 1 0 32%; /* Allow columns to grow and aim for roughly 1/3 width */
+    min-width: 300px; /* Minimum width for a table to be somewhat readable */
+    /* If you want them to grow if fewer than 3, use flex-grow: 1 */
+    /* For now, fixed width based on 3 columns is fine */
+}
+
+/* Ensure tables inside columns don't overflow their containers weirdly */
+.workplace-column table {
+    width: 100%; /* Make table take full width of its column */
 } 

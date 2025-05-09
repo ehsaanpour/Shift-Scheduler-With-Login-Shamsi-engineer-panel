@@ -992,8 +992,124 @@
     ],
     "limitations": {
       "1404": {
-        "2": {},
+        "2": {
+          "21": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "22": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "23": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "24": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "25": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "26": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "27": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "28": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "29": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "30": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "31": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ]
+        },
         "3": {
+          "1": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "2": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "3": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "4": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "5": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "6": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "7": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "8": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "9": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "10": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "11": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "12": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
           "13": [
             "shift1",
             "shift2",
@@ -1010,6 +1126,26 @@
             "shift3"
           ],
           "16": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "17": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "18": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "19": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "20": [
             "shift1",
             "shift2",
             "shift3"
@@ -1270,8 +1406,7 @@
     "name": "نوبخت",
     "workplaces": [
       "Studio Hispan",
-      "Studio Press",
-      "Nodal"
+      "Studio Press"
     ],
     "limitations": {
       "1404": {
@@ -1622,8 +1757,7 @@
     "name": "فقیهی",
     "workplaces": [
       "Studio Hispan",
-      "Studio Press",
-      "Nodal"
+      "Studio Press"
     ],
     "limitations": {
       "1404": {
@@ -2323,7 +2457,73 @@
       "Studio Press",
       "Nodal"
     ],
-    "limitations": {},
+    "limitations": {
+      "1404": {
+        "2": {
+          "21": [
+            "shift1"
+          ],
+          "26": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "27": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "28": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "29": [
+            "shift1"
+          ]
+        },
+        "3": {
+          "4": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "5": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "6": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "7": [
+            "shift1"
+          ],
+          "13": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "14": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "15": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ],
+          "16": [
+            "shift1",
+            "shift2",
+            "shift3"
+          ]
+        }
+      }
+    },
     "minShifts": 10,
     "maxShifts": 30
   }
