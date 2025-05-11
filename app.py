@@ -312,20 +312,19 @@ def login_required(f):
 
 # Admin required decorator
 def admin_required(f):
-    @wraps(f) # Use wraps
+    @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user' not in session:
-            flash('لطفا برای دسترسی به این صفحه وارد شوید.', 'warning') # Translated
+            flash('لطفا برای دسترسی به این صفحه وارد شوید.', 'warning')
             return redirect(url_for('login_page'))
-        # Check for 'role' key and if it's 'admin'
-        if session['user'].get('role') != 'admin': 
-            flash('برای دسترسی به این صفحه به سطح دسترسی ادمین نیاز دارید.', 'danger') # Translated
-            # Redirect non-admins to their dashboard or login
-            if session['user'].get('role') == 'engineer':
-                 return redirect(url_for('engineer_dashboard'))
-            else: # Unknown role or missing role
-                 session.clear() # Clear potentially invalid session
-                 return redirect(url_for('login_page'))
+            
+        # Get user from database to verify role
+        user = get_user(session['user']['username'])
+        if not user or user.get('role') != 'admin':
+            flash('برای دسترسی به این صفحه به سطح دسترسی ادمین نیاز دارید.', 'danger')
+            session.clear()  # Clear potentially compromised session
+            return redirect(url_for('login_page'))
+            
         return f(*args, **kwargs)
     return decorated_function
 
@@ -334,22 +333,22 @@ def engineer_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user' not in session:
-            flash('لطفا برای دسترسی به این صفحه وارد شوید.', 'warning') # Translated
+            flash('لطفا برای دسترسی به این صفحه وارد شوید.', 'warning')
             return redirect(url_for('login_page'))
-        if session['user'].get('role') != 'engineer':
-            flash('برای دسترسی به این صفحه به سطح دسترسی مهندس نیاز دارید.', 'danger') # Translated
-             # Redirect non-engineers to admin dashboard or login
-            if session['user'].get('role') == 'admin':
-                 return redirect(url_for('index')) # Or admin_page? index seems the main admin view
-            else: # Unknown role or missing role
-                 session.clear() # Clear potentially invalid session
-                 return redirect(url_for('login_page'))
-        # Check if engineer is linked
-        if not session['user'].get('engineer_name'):
-             # Already translated in previous step
-             flash('حساب کاربری شما به پروفایل مهندس متصل نیست. لطفا با ادمین تماس بگیرید.', 'danger') 
-             session.clear() # Log out user with incomplete setup
-             return redirect(url_for('login_page'))
+            
+        # Get user from database to verify role
+        user = get_user(session['user']['username'])
+        if not user or user.get('role') != 'engineer':
+            flash('برای دسترسی به این صفحه به سطح دسترسی مهندس نیاز دارید.', 'danger')
+            session.clear()  # Clear potentially compromised session
+            return redirect(url_for('login_page'))
+            
+        # Verify engineer is linked
+        if not user.get('engineer_name'):
+            flash('حساب کاربری شما به پروفایل مهندس متصل نیست. لطفا با ادمین تماس بگیرید.', 'danger')
+            session.clear()
+            return redirect(url_for('login_page'))
+            
         return f(*args, **kwargs)
     return decorated_function
 
@@ -365,12 +364,15 @@ def index():
         if unread_notifications: # Only mark as read if there were unread ones
             mark_notifications_as_read(admin_username)
     # --- End Notification Handling ---
+
+    engineers = load_engineers() # Load engineers
     
     return render_template("index.html", 
                            workplaces=WORKPLACES, 
                            shifts=SHIFTS, 
                            username=session['user']['username'],
-                           unread_notifications=unread_notifications # Pass notifications to template
+                           unread_notifications=unread_notifications, # Pass notifications to template
+                           engineers=engineers # Pass engineers to template
                            )
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -384,56 +386,59 @@ def login_page():
         if not user:
             return render_template("login.html", error="Invalid username or password")
         
-        # --- Store enhanced user info in session ---
-        session['user'] = {
-            "username": user["username"], 
-            "role": user["role"],
-            "engineer_name": user.get("engineer_name") # Use .get for safety
-        }
-        logging.info(f"LOGIN_SUCCESS: Session set for user {user['username']}. Session data: {session}") # Added log
+        # Clear any existing session data
+        session.clear()
         
-        # --- Redirect based on role ---
+        # Store minimal user info in session
+        session['user'] = {
+            "username": user["username"],
+            "role": user["role"],
+            "engineer_name": user.get("engineer_name"),
+            "login_time": datetime.now(timezone.utc).isoformat()
+        }
+        
+        # Set session security options
+        # session.permanent = False  # Session expires when browser closes <-- Commenting this out
+        session.modified = True    # Force session update
+        
+        logging.info(f"LOGIN_SUCCESS: Session set for user {user['username']}. Role: {user['role']}")
+        
+        # Redirect based on role
         if user["role"] == "admin":
-            # Translate admin success message
-            flash(f"ورود ادمین موفقیت‌آمیز بود. خوش آمدید {user['username']}!", 'success') 
-            return redirect(url_for('index')) # Redirect admin to main schedule page
+            flash(f"ورود ادمین موفقیت‌آمیز بود. خوش آمدید {user['username']}!", 'success')
+            return redirect(url_for('index'))
         elif user["role"] == "engineer":
-             # Check if engineer name exists before redirecting
             if user.get('engineer_name'):
-                 # Translate engineer success message and add logging
-                 logging.info(f"Flashing engineer welcome message for: {user['engineer_name']}") # Add log
-                 flash(f"ورود مهندس موفقیت‌آمیز بود. خوش آمدید {user['engineer_name']}!", 'success') # Translated
-                 return redirect(url_for('engineer_dashboard')) # Redirect engineer to their dashboard
+                flash(f"ورود مهندس موفقیت‌آمیز بود. خوش آمدید {user['engineer_name']}!", 'success')
+                return redirect(url_for('engineer_dashboard'))
             else:
-                # This case should ideally be prevented by admin setup, but handle defensively
-                session.clear() # Log out incomplete user
-                # Translate error message
-                flash('ورود ناموفق: حساب کاربری مهندس به طور کامل پیکربندی نشده است. با ادمین تماس بگیرید.', 'danger') 
+                session.clear()
+                flash('ورود ناموفق: حساب کاربری مهندس به طور کامل پیکربندی نشده است. با ادمین تماس بگیرید.', 'danger')
                 return redirect(url_for('login_page'))
         else:
-            # Fallback for unknown roles
-            session.clear() # Log out
-             # Translate error message
+            session.clear()
             flash('ورود ناموفق: نقش کاربر ناشناخته است.', 'danger')
             return redirect(url_for('login_page'))
 
     # If GET request
     if 'user' in session:
-        # Redirect already logged-in users
-        if session['user'].get('role') == 'admin':
+        # Verify session data against database
+        user = get_user(session['user'].get('username'))
+        if not user or user.get('role') != session['user'].get('role'):
+            session.clear()
+            flash('نشست نامعتبر است. لطفا دوباره وارد شوید.', 'warning')
+            return redirect(url_for('login_page'))
+            
+        # Redirect based on role
+        if user["role"] == "admin":
             return redirect(url_for('index'))
-        elif session['user'].get('role') == 'engineer':
-            # Add check for engineer_name for robustness on subsequent visits
-            if session['user'].get('engineer_name'):
-                 return redirect(url_for('engineer_dashboard'))
-            else:
-                 # Log out if session data is incomplete
-                 session.clear()
-                 # Translate warning message
-                 flash('نشست نامعتبر است. لطفا دوباره وارد شوید.', 'warning') 
-                 return redirect(url_for('login_page'))
+        elif user["role"] == "engineer" and user.get('engineer_name'):
+            return redirect(url_for('engineer_dashboard'))
+        else:
+            session.clear()
+            flash('نشست نامعتبر است. لطفا دوباره وارد شوید.', 'warning')
+            return redirect(url_for('login_page'))
 
-    # Show login page if not logged in
     return render_template("login.html", error=None)
 
 @app.route('/logout')
@@ -735,29 +740,67 @@ def save_schedule():
 @app.route('/api/generate_excel', methods=['POST'])
 @login_required
 def generate_excel():
-    data = request.json
+    logging.info(f"generate_excel: Request headers: {request.headers}")
+    logging.info(f"generate_excel: Request raw data: {request.data}")
+    try:
+        data = request.get_json()
+        if data is None:
+            logging.error("generate_excel: Failed to parse JSON data or data is empty.")
+            return jsonify({"status": "error", "error": "Invalid JSON payload or empty request body."}), 400
+    except Exception as e:
+        logging.error(f"generate_excel: Error getting JSON data: {e}", exc_info=True)
+        return jsonify({"status": "error", "error": f"Error processing request data: {str(e)}"}), 400
+
+    logging.info(f"generate_excel: Parsed data: {data}")
     # Assume year/month received from frontend are Jalali
     year = data.get('year')
     month = data.get('month')
+
+    if not year or not month:
+        logging.error(f"generate_excel: Year or month missing in request. Year: {year}, Month: {month}")
+        return jsonify({"status": "error", "error": "Year and month are required in JSON payload."}), 400
     
     schedules = load_schedules()
     # Use Jalali year/month for the key
     period_key = f"{year}-{month}"
     
     if period_key not in schedules:
-        return jsonify({"error": "No schedule data found for selected period"}), 404
+        logging.warning(f"generate_excel: No schedule data found for period {period_key}.")
+        response = jsonify({"status": "error", "error": f"No schedule data found for selected period {year}-{month} (Test: Sent as 200 OK)"})
+        response.status_code = 200 # DIAGNOSTIC: Send 200 OK instead of 404
+        return response
     
     # Generate Excel files for each workplace
     excel_files = []
+    generation_errors = []
     for workplace in WORKPLACES:
         # Use Jalali year/month in filename
         filename = f"{workplace.replace(' ', '_')}_{year}_{month}.xlsx"
         file_path = os.path.join(DATA_DIR, filename)
         
-        # Create Excel with formatting using Jalali calendar info
-        create_excel_schedule(file_path, workplace, year, month, schedules[period_key].get(workplace, {}))
-        excel_files.append(filename)
+        try:
+            # Create Excel with formatting using Jalali calendar info
+            create_excel_schedule(file_path, workplace, str(year), str(month), schedules[period_key].get(workplace, {}))
+            excel_files.append(filename)
+        except Exception as e:
+            logging.error(f"generate_excel: Error creating Excel for workplace {workplace}: {e}", exc_info=True)
+            generation_errors.append(f"Error for {workplace}: {str(e)}")
     
+    if generation_errors:
+        # If some files were generated but others had errors
+        if excel_files:
+            return jsonify({
+                "status": "partial_success",
+                "files": excel_files,
+                "errors": generation_errors
+            }), 207 # Multi-Status
+        else:
+            return jsonify({
+                "status": "error",
+                "error": "Failed to generate any Excel files.",
+                "details": generation_errors
+            }), 500
+
     return jsonify({
         "status": "success",
         "files": excel_files
@@ -971,6 +1014,111 @@ def create_excel_schedule(file_path, workplace, year, month, schedule_data):
     
     # Save workbook
     wb.save(file_path)
+
+# --- New Function to Create Overall Excel Schedule ---
+def create_overall_excel_schedule(file_path, year, month, schedules_data):
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = f"Overall Shifts {year}-{month}"
+
+    # Define styles (can be reused or adapted from create_excel_schedule)
+    header_fill = PatternFill(start_color="4F81BD", end_color="4F81BD", fill_type="solid")
+    weekend_fill = PatternFill(start_color="DCE6F1", end_color="DCE6F1", fill_type="solid")
+    border = Border(left=Side(style='thin'), right=Side(style='thin'), top=Side(style='thin'), bottom=Side(style='thin'))
+    header_font = Font(bold=True, color="FFFFFF")
+    centered = Alignment(horizontal='center', vertical='center')
+    title_font = Font(bold=True, size=14)
+
+    current_column_offset = 1 # Starting column for the first table
+
+    try:
+        year_int = int(year)
+        month_int = int(month)
+        jalali_month_name = PERSIAN_MONTH_NAMES[month_int]
+
+        if 1 <= month_int <= 6:
+            num_days = 31
+        elif 7 <= month_int <= 11:
+            num_days = 30
+        elif month_int == 12:
+            num_days = 30 if jdt.isleap(year_int) else 29
+        else:
+            raise ValueError(f"Invalid month: {month_int}")
+
+    except ValueError as ve:
+        logging.error(f"Error creating overall Excel: Invalid year/month - {ve}")
+        ws.cell(row=1, column=1).value = f"Error: Invalid year/month provided ({year}-{month})."
+        wb.save(file_path)
+        return
+
+    for workplace_index, workplace in enumerate(WORKPLACES):
+        schedule_data_for_workplace = schedules_data.get(workplace, {})
+        
+        # --- Workplace Title ---
+        title_start_col = current_column_offset
+        title_end_col = current_column_offset + 3 # Shifts + Day column
+        ws.merge_cells(start_row=1, start_column=title_start_col, end_row=1, end_column=title_end_col)
+        title_cell = ws.cell(row=1, column=title_start_col)
+        title_cell.value = f"{workplace} - {jalali_month_name} {year_int}"
+        title_cell.font = title_font
+        title_cell.alignment = centered
+
+        # --- Headers ---
+        headers = ["Day", "Shift 1", "Shift 2", "Shift 3"]
+        for col_idx, header_text in enumerate(headers):
+            cell = ws.cell(row=3, column=current_column_offset + col_idx)
+            cell.value = header_text
+            cell.fill = header_fill
+            cell.font = header_font
+            cell.border = border
+            cell.alignment = centered
+            ws.column_dimensions[get_column_letter(current_column_offset + col_idx)].width = 18
+
+        # --- Fill in Days and Shifts ---
+        for day in range(1, num_days + 1):
+            current_row = day + 3
+            try:
+                j_date = jdt.date(year_int, month_int, day)
+                g_date = j_date.togregorian()
+                persian_weekday_index = (g_date.weekday() + 2) % 7
+                persian_day_name = PERSIAN_DAY_NAMES[persian_weekday_index]
+            except ValueError:
+                persian_day_name = "خطا"
+                g_date = None
+
+            day_cell = ws.cell(row=current_row, column=current_column_offset)
+            day_cell.value = f"{day} - {persian_day_name}"
+            day_cell.border = border
+            day_cell.alignment = Alignment(horizontal='left', vertical='center')
+
+            is_weekend = (g_date.weekday() == 3 or g_date.weekday() == 4) if g_date else False
+            if is_weekend:
+                for col_offset in range(4): # Day + 3 shifts
+                    ws.cell(row=current_row, column=current_column_offset + col_offset).fill = weekend_fill
+            
+            day_str = str(day)
+            if day_str in schedule_data_for_workplace:
+                for shift_idx, shift_name in enumerate(SHIFTS):
+                    shift_key = f"shift{shift_idx + 1}"
+                    cell_to_fill = ws.cell(row=current_row, column=current_column_offset + 1 + shift_idx)
+                    if shift_key in schedule_data_for_workplace[day_str]:
+                        cell_to_fill.value = schedule_data_for_workplace[day_str][shift_key]
+                    cell_to_fill.border = border
+                    cell_to_fill.alignment = centered
+            else:
+                for shift_idx in range(len(SHIFTS)):
+                    ws.cell(row=current_row, column=current_column_offset + 1 + shift_idx).border = border
+        
+        # Set row height for this table section (approx num_days + 4 header/title rows)
+        for r in range(1, num_days + 5):
+            ws.row_dimensions[r].height = 22
+
+        # Update column offset for the next table (4 columns for data + 1 for spacing)
+        current_column_offset += (len(headers) + 1)
+
+    wb.save(file_path)
+
+# --- END New Function ---
 
 # --- Engineer Dashboard Route ---
 @app.route('/engineer/dashboard')
@@ -1295,6 +1443,52 @@ def mark_admin_read_api(engineer_name):
     return jsonify({"status": "success", "marked_read": updated})
 
 # --- END Messaging API Routes ---
+
+# --- New API Route for Overall Excel ---
+@app.route('/api/generate_overall_excel', methods=['POST'])
+@login_required
+def generate_overall_excel():
+    logging.info(f"generate_overall_excel: Request headers: {request.headers}")
+    logging.info(f"generate_overall_excel: Request raw data: {request.data}")
+    try:
+        data = request.get_json()
+        if data is None:
+            logging.error("generate_overall_excel: Failed to parse JSON data or data is empty.")
+            return jsonify({"status": "error", "error": "Invalid JSON payload or empty request body."}), 400
+    except Exception as e:
+        logging.error(f"generate_overall_excel: Error getting JSON data: {e}", exc_info=True)
+        return jsonify({"status": "error", "error": f"Error processing request data: {str(e)}"}), 400
+        
+    logging.info(f"generate_overall_excel: Parsed data: {data}")
+    year = data.get('year')
+    month = data.get('month')
+
+    if not year or not month:
+        logging.error(f"generate_overall_excel: Year or month missing. Year: {year}, Month: {month}")
+        return jsonify({"status": "error", "error": "Year and month are required."}), 400
+
+    schedules = load_schedules()
+    period_key = f"{year}-{month}"
+    schedule_data_for_period = schedules.get(period_key)
+
+    if not schedule_data_for_period:
+        logging.warning(f"generate_overall_excel: No schedule data for period {period_key}")
+        response = jsonify({"status": "error", "error": f"No schedule data found for {year}-{month} (Test: Sent as 200 OK)"})
+        response.status_code = 200 # DIAGNOSTIC: Send 200 OK instead of 404
+        return response
+
+    # Use Jalali year/month in filename
+    filename = f"Overall_Shifts_{year}_{month}.xlsx"
+    file_path = os.path.join(DATA_DIR, filename)
+
+    try:
+        create_overall_excel_schedule(file_path, str(year), str(month), schedule_data_for_period)
+        return jsonify({"status": "success", "file": filename})
+    except Exception as e:
+        logging.error(f"Error generating overall Excel for {year}-{month}: {e}", exc_info=True)
+        return jsonify({"status": "error", "error": f"Failed to generate overall Excel: {str(e)}"}), 500
+
+# --- END New API Route ---
 
 if __name__ == '__main__':
     app.run(debug=True, port=8000)

@@ -90,6 +90,9 @@
                 <button id="excelGenerateBtn" class="btn btn-success">
                     <i class="fas fa-file-excel me-2"></i>Generate Excel Files
                 </button>
+                <button id="overallExcelGenerateBtn" class="btn btn-info ms-2">
+                    <i class="fas fa-file-archive me-2"></i>گزارش کلی شیفت‌ها
+                </button>
             </div>
         </div>
         
@@ -156,6 +159,10 @@
             // Add event listener to the generate button
             const generateBtn = document.getElementById('excelGenerateBtn');
             generateBtn.addEventListener('click', generateExcelFiles);
+
+            // Add event listener to the new overall generate button
+            const overallGenerateBtn = document.getElementById('overallExcelGenerateBtn');
+            overallGenerateBtn.addEventListener('click', generateOverallExcelFile);
             
             // Function to generate Excel files
             function generateExcelFiles() {
@@ -223,6 +230,78 @@
                 .catch(error => {
                     console.error('Error generating Excel files:', error);
                     showAlert('Failed to generate Excel files. Please make sure you have saved the schedule.', 'danger');
+                });
+            }
+
+            // Function to generate Overall Excel file
+            function generateOverallExcelFile() {
+                const monthSelect = document.getElementById('excelMonthSelect');
+                const yearSelect = document.getElementById('excelYearSelect');
+                
+                const month = parseInt(monthSelect.value);
+                const year = parseInt(yearSelect.value);
+                
+                console.log(`Generating Overall Excel file for ${month}/${year}`);
+                
+                // Show loading message
+                showAlert('Generating Overall Excel file...', 'info');
+                
+                // Make API call
+                fetch('/api/generate_overall_excel', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        year: year,
+                        month: month
+                    })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        // Try to get error message from response body
+                        return response.json().then(errData => {
+                            throw new Error(errData.error || 'Failed to generate Overall Excel file');
+                        }).catch(() => {
+                            throw new Error('Failed to generate Overall Excel file and could not parse error response.');
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.status === 'success' && data.file) {
+                        const downloadList = document.getElementById('downloadList');
+                        downloadList.innerHTML = ''; // Clear previous links
+                        
+                        const li = document.createElement('li');
+                        li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
+                        
+                        const fileName = document.createElement('span');
+                        fileName.textContent = data.file;
+                        
+                        const downloadLink = document.createElement('a');
+                        downloadLink.href = `/api/download/${data.file}`;
+                        downloadLink.classList.add('btn', 'btn-sm', 'btn-outline-primary');
+                        downloadLink.innerHTML = '<i class="fas fa-download me-1"></i> Download';
+                        downloadLink.download = data.file;
+                        
+                        li.appendChild(fileName);
+                        li.appendChild(downloadLink);
+                        downloadList.appendChild(li);
+                        
+                        // Show modal
+                        const modal = new bootstrap.Modal(document.getElementById('excelGeneratedModal'));
+                        modal.show();
+                        
+                        // Remove any previous alerts
+                        document.getElementById('alertContainer').innerHTML = '';
+                    } else {
+                        showAlert(data.error || 'Failed to generate Overall Excel file. Please check server logs.', 'danger');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error generating Overall Excel file:', error);
+                    showAlert(error.message || 'Failed to generate Overall Excel file. Please make sure you have saved the schedule and check server logs.', 'danger');
                 });
             }
             
