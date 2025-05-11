@@ -91,11 +91,26 @@
                     </div>
                 </div>
             </div>
-            <div class="card-body p-0"> 
-                <!-- Remove Tab Navigation and Tab Content -->
-                <!-- <ul class="nav nav-tabs nav-fill" id="workplaceTabs" role="tablist"> ... </ul> -->
-                <!-- <div class="tab-content p-3" id="workplaceTabContent"> ... </div> -->
+            <div class="card-body p-3">  {# Changed p-0 to p-3 for some padding #}
 
+                <!-- Engineer Highlight Feature -->
+                <div class="row mb-3 align-items-end">
+                    <div class="col-md-4">
+                        <label for="engineerHighlightSelect" class="form-label">هایلایت مهندس:</label>
+                        <select id="engineerHighlightSelect" class="form-select form-select-sm">
+                            <option value="-">-</option>
+                            {# Engineers will be populated by JS #}
+                        </select>
+                    </div>
+                    <div class="col-md-auto">
+                        <button id="highlightEngineerBtn" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-search me-1"></i> انتخاب مهندس
+                        </button>
+                    </div>
+                </div>
+                <div id="engineerHighlightFeedback" class="mb-3 small"></div> {# New div for feedback #}
+                <!-- End Engineer Highlight Feature -->
+                
                 <!-- NEW: Horizontal Flex Container -->
                 <div id="horizontal-schedule-container" class="horizontal-schedule-container">
                     {% for workplace in workplaces %}
@@ -435,6 +450,7 @@
 {% endblock %}
 
 {% block extra_js %}
+{{ super() }}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Global variables
@@ -2015,6 +2031,142 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     // --- END NEW FUNCTION SECTION ---
 
+    const engineerHighlightSelect = document.getElementById('engineerHighlightSelect');
+    const highlightEngineerBtn = document.getElementById('highlightEngineerBtn');
+    const scheduleContainer = document.getElementById('horizontal-schedule-container'); // Main container for all workplace tables
+
+    // Function to fetch engineers and populate the highlight dropdown
+    function populateEngineerHighlightDropdown() {
+        fetch('/api/engineers')
+            .then(response => response.json())
+            .then(engineers => {
+                // Clear existing options except the first one ("-")
+                while (engineerHighlightSelect.options.length > 1) {
+                    engineerHighlightSelect.remove(1);
+                }
+                engineers.forEach(engineer => {
+                    const option = document.createElement('option');
+                    option.value = engineer.name;
+                    option.textContent = engineer.name;
+                    engineerHighlightSelect.appendChild(option);
+                });
+            })
+            .catch(error => console.error('Error fetching engineers for highlight:', error));
+    }
+
+    // Function to clear existing highlights from all schedule cells
+    function clearAllCellHighlights() {
+        if (!scheduleContainer) return;
+        const allCells = scheduleContainer.querySelectorAll('td[data-engineer-name]');
+        allCells.forEach(cell => {
+            cell.style.backgroundColor = ''; // Reset background
+            // If you are adding/removing a class for highlighting, do that here instead
+            // cell.classList.remove('highlighted-engineer-cell');
+        });
+    }
+
+    // Function to highlight cells for the selected engineer
+    function highlightEngineerInSchedule() {
+        clearAllCellHighlights(); // Clear previous highlights first
+        const feedbackDiv = document.getElementById('engineerHighlightFeedback');
+        if (feedbackDiv) {
+            feedbackDiv.textContent = ''; // Clear previous feedback
+            feedbackDiv.className = 'mb-3 small'; // Reset class
+        }
+
+        const selectedEngineer = engineerHighlightSelect.value;
+        if (!scheduleContainer) return; // Should not happen if elements are present
+
+        if (selectedEngineer === '-') {
+            if (feedbackDiv) feedbackDiv.textContent = 'مهندسی برای هایلایت انتخاب نشده است.';
+            return; 
+        }
+
+        const engineerCells = scheduleContainer.querySelectorAll('td'); 
+        let shiftsFoundCount = 0;
+
+        engineerCells.forEach(cell => {
+            // Check if the cell's text content (or input value if it's an input) matches the selected engineer
+            let cellValue = '';
+            const inputElement = cell.querySelector('input, select'); // Check for input or select fields within td
+            if (inputElement) {
+                cellValue = inputElement.value.trim();
+            } else {
+                cellValue = cell.textContent.trim();
+            }
+
+            if (cellValue === selectedEngineer) {
+                cell.style.backgroundColor = '#0afa12';
+                shiftsFoundCount++;
+            }
+        });
+
+        if (feedbackDiv) {
+            if (shiftsFoundCount > 0) {
+                feedbackDiv.textContent = `${toPersianDigits(shiftsFoundCount)} شیفت برای ${selectedEngineer} یافت شد.`;
+                feedbackDiv.classList.add('text-success');
+            } else {
+                feedbackDiv.textContent = `هیچ شیفتی برای ${selectedEngineer} یافت نشد.`;
+                feedbackDiv.classList.add('text-info');
+            }
+        }
+    }
+
+    // Event listener for the highlight button
+    if (highlightEngineerBtn) {
+        highlightEngineerBtn.addEventListener('click', highlightEngineerInSchedule);
+    }
+
+    // Populate dropdown on load
+    populateEngineerHighlightDropdown();
+
+    // ----- OBSERVER TO RE-APPLY HIGHLIGHTS AFTER DYNAMIC TABLE REGENERATION -----
+    // If your tables are regenerated (e.g., when changing month/year),
+    // the highlights will be lost. We need to re-apply them.
+    // We also need to re-populate the engineer list if it could change.
+
+    // We need a robust way to detect when schedule tables are updated.
+    // Let's assume `generateScheduleTable` or similar functions are called.
+    // For now, we'll re-apply highlights when the "Save Schedule" button might indicate a change,
+    // or when month/year changes which triggers table regeneration.
+
+    // const monthSelect = document.getElementById('monthSelect'); // Assuming this is already declared above in the same scope
+    // const yearSelect = document.getElementById('yearSelect');   // Assuming this is already declared above in the same scope
+
+    function reapplyHighlightAfterTableChange() {
+        // Small delay to ensure table DOM is updated
+        setTimeout(() => {
+            highlightEngineerInSchedule();
+        }, 200);
+    }
+
+    // Use existing monthSelect and yearSelect variables, assuming they are in scope
+    // from the main part of the script that handles schedule loading.
+    // If `monthSelect` or `yearSelect` are not found, these lines will do nothing, which is fine.
+    const existingMonthSelect = document.getElementById('monthSelect');
+    const existingYearSelect = document.getElementById('yearSelect');
+
+    if (existingMonthSelect) existingMonthSelect.addEventListener('change', reapplyHighlightAfterTableChange);
+    if (existingYearSelect) existingYearSelect.addEventListener('change', reapplyHighlightAfterTableChange);
+
+    // If you have a specific event or callback after tables are drawn, use that instead
+    // For example, if `loadSchedule` or `generateScheduleTable` emits a custom event:
+    // document.addEventListener('scheduleRendered', reapplyHighlightAfterTableChange);
+
+    // Also, if new engineers can be added/deleted dynamically without a page reload,
+    // you'd need to call populateEngineerHighlightDropdown() again after such operations.
+    // For instance, after saving a new engineer via the modal.
+    // Example: (Assuming 'btnSaveEngineer' is the ID of the save button in the engineer modal)
+    const btnSaveEngineer = document.getElementById('btnSaveEngineer');
+    if(btnSaveEngineer) {
+        btnSaveEngineer.addEventListener('click', function() {
+            // Add a small delay to allow the save operation and backend update to complete
+            setTimeout(populateEngineerHighlightDropdown, 1000); // Re-fetch engineers
+        });
+    }
+    // Make sure other existing JS code is not removed by this block
+    // Consider putting this JS in its own file or merging carefully
+    // with existing document.addEventListener('DOMContentLoaded', ...)
 });
 </script>
 {% endblock %}

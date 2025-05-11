@@ -51,7 +51,7 @@
     "timestamp": "2025-05-04T10:52:04.287051+00:00",
     "content": "سلام \nلطفا\nروز 25 اردیبهشت-شیفت سوم نودال\nروز 31 اردیبهشت-شیفت 1پرس شیفت 2 و 3 نودال",
     "read_by_engineer": true,
-    "read_by_admin": false
+    "read_by_admin": true
   },
   {
     "message_id": "309b30f6-8a43-4965-a686-806e6550ee9e",
@@ -60,7 +60,7 @@
     "timestamp": "2025-05-04T10:58:48.265818+00:00",
     "content": "2 خرداد\nشیفت یک هیسپان\nشیفت 2 و 3 نودال\n7 خرداد\nشیفت یک هیسپان\nشیفت 2 و 3 نودال\n9 خرداد\nشیفت 2 پرس\nشیفت 3 نودال\n18 خرداد\nشیفت 3 نودال\n20 خرداد\nشیفت 3 نودال",
     "read_by_engineer": true,
-    "read_by_admin": false
+    "read_by_admin": true
   },
   {
     "message_id": "83ce4680-e7bb-4dc0-97d4-a71ab547192f",
@@ -79,5 +79,14 @@
     "content": "سلام و عرض خسته نباشید\nاگر امکانش بشه شنبه یا یکشنبه شیفت ۱ و ۲ باهم برای بنده بچینید خوب هستش\nفقط ممنون میشم اگر دوشیفت برام چیدید شیفت های قبلی یا بعدی باهاش حداقل یک روز فاصله داشته باشن\nتشکر🙏",
     "read_by_engineer": true,
     "read_by_admin": false
+  },
+  {
+    "message_id": "cb124857-1dc3-4b05-aaa4-6ad4ff904eb2",
+    "engineer_name": "شریفی",
+    "sender_role": "admin",
+    "timestamp": "2025-05-10T02:25:56.096238+00:00",
+    "content": "۲۵ ام که پنج شنبه است",
+    "read_by_engineer": false,
+    "read_by_admin": true
   }
 ]

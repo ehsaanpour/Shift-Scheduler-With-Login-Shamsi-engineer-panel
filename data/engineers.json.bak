@@ -33,7 +33,8 @@
             "shift3"
           ],
           "30": [
-            "shift1"
+            "shift1",
+            "shift2"
           ]
         },
         "3": {
@@ -109,33 +110,33 @@
             "shift2"
           ],
           "23": [
-            "shift2",
-            "shift3"
+            "shift2"
           ],
           "24": [
-            "shift1",
-            "shift2",
             "shift3"
           ],
           "25": [
+            "shift2"
+          ],
+          "26": [
+            "shift2"
+          ],
+          "27": [
+            "shift2",
+            "shift3"
+          ],
+          "28": [
             "shift1",
             "shift2",
             "shift3"
           ],
-          "26": [
-            "shift1",
-            "shift2"
-          ],
-          "27": [
-            "shift2"
-          ],
-          "28": [
-            "shift2"
-          ],
           "29": [
-            "shift2"
+            "shift1",
+            "shift2",
+            "shift3"
           ],
           "30": [
+            "shift1",
             "shift2"
           ],
           "31": [
@@ -1437,52 +1438,52 @@
           ]
         },
         "3": {
-          "2": [
+          "3": [
             "shift1",
             "shift2",
             "shift3"
           ],
-          "5": [
+          "6": [
             "shift1",
             "shift2",
             "shift3"
           ],
-          "8": [
+          "9": [
             "shift1",
             "shift2",
             "shift3"
           ],
-          "11": [
+          "12": [
             "shift1",
             "shift2",
             "shift3"
           ],
-          "14": [
+          "15": [
             "shift1",
             "shift2",
             "shift3"
           ],
-          "17": [
+          "18": [
             "shift1",
             "shift2",
             "shift3"
           ],
-          "20": [
+          "21": [
             "shift1",
             "shift2",
             "shift3"
           ],
-          "23": [
+          "24": [
             "shift1",
             "shift2",
             "shift3"
           ],
-          "26": [
+          "27": [
             "shift1",
             "shift2",
             "shift3"
           ],
-          "29": [
+          "30": [
             "shift1",
             "shift2",
             "shift3"
@@ -1501,7 +1502,20 @@
       "Nodal",
       "Engineer Room"
     ],
-    "limitations": {},
+    "limitations": {
+      "1404": {
+        "3": {
+          "2": [
+            "shift1",
+            "shift2"
+          ],
+          "3": [
+            "shift1",
+            "shift2"
+          ]
+        }
+      }
+    },
     "minShifts": 10,
     "maxShifts": 30
   },
@@ -2318,6 +2332,7 @@
             "shift2"
           ],
           "23": [
+            "shift1",
             "shift2",
             "shift3"
           ],
