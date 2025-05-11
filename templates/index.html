@@ -1979,18 +1979,40 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 for (let shiftNum = 1; shiftNum <= 3; shiftNum++) {
                     const shiftKey = `shift${shiftNum}`;
-                    let cellContent = '-';
+                    let cellContent = ''; // Default to empty for the new logic
                     let cellColor = defaultCellColor;
+                    const dayStr = String(day);
+                    const yearStr = String(year); // Ensure year is string for lookup
+                    const monthStr = String(month); // Ensure month is string for lookup
 
                     // Check if this engineer is assigned to this specific day and shift
-                    if (assignments[String(day)] && 
-                        assignments[String(day)][shiftKey] && 
-                        assignments[String(day)][shiftKey][engineer.name]) {
+                    if (assignments[dayStr] && 
+                        assignments[dayStr][shiftKey] && 
+                        assignments[dayStr][shiftKey][engineer.name]) {
                         
-                        const assignedWorkplace = assignments[String(day)][shiftKey][engineer.name];
-                        cellColor = workplaceColors[assignedWorkplace] || defaultCellColor; // Use mapped color or default
-                        // You might want to display workplace name or abbreviation instead of color code
-                        cellContent = ''; // Clear the dash, cell color indicates assignment
+                        const assignedWorkplace = assignments[dayStr][shiftKey][engineer.name];
+                        cellColor = workplaceColors[assignedWorkplace] || defaultCellColor;
+                        // cellContent remains empty as color indicates assignment
+                    } else {
+                        // Not assigned, now check for limitations
+                        // Assuming engineerLimitations is available and structured as: 
+                        // engineerLimitations[engineerName][yearStr][monthStr][dayStr] = ["shift1", ...]
+                        let hasLimitation = false;
+                        if (typeof engineerLimitations !== 'undefined' && 
+                            engineerLimitations[engineer.name] &&
+                            engineerLimitations[engineer.name][yearStr] &&
+                            engineerLimitations[engineer.name][yearStr][monthStr] &&
+                            engineerLimitations[engineer.name][yearStr][monthStr][dayStr] &&
+                            engineerLimitations[engineer.name][yearStr][monthStr][dayStr].includes(shiftKey)) {
+                            hasLimitation = true;
+                        }
+
+                        if (hasLimitation) {
+                            cellContent = '-'; // Show '-' if there's a limitation
+                        } else {
+                            cellContent = ''; // Empty if no assignment and no limitation
+                        }
+                        // cellColor remains defaultCellColor
                     }
                     
                     popupHTML += `<td style="background-color: ${cellColor};">${cellContent}</td>`;
