@@ -364,15 +364,12 @@ def index():
         if unread_notifications: # Only mark as read if there were unread ones
             mark_notifications_as_read(admin_username)
     # --- End Notification Handling ---
-
-    engineers = load_engineers() # Load engineers
     
     return render_template("index.html", 
                            workplaces=WORKPLACES, 
                            shifts=SHIFTS, 
                            username=session['user']['username'],
-                           unread_notifications=unread_notifications, # Pass notifications to template
-                           engineers=engineers # Pass engineers to template
+                           unread_notifications=unread_notifications # Pass notifications to template
                            )
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -740,67 +737,29 @@ def save_schedule():
 @app.route('/api/generate_excel', methods=['POST'])
 @login_required
 def generate_excel():
-    logging.info(f"generate_excel: Request headers: {request.headers}")
-    logging.info(f"generate_excel: Request raw data: {request.data}")
-    try:
-        data = request.get_json()
-        if data is None:
-            logging.error("generate_excel: Failed to parse JSON data or data is empty.")
-            return jsonify({"status": "error", "error": "Invalid JSON payload or empty request body."}), 400
-    except Exception as e:
-        logging.error(f"generate_excel: Error getting JSON data: {e}", exc_info=True)
-        return jsonify({"status": "error", "error": f"Error processing request data: {str(e)}"}), 400
-
-    logging.info(f"generate_excel: Parsed data: {data}")
+    data = request.json
     # Assume year/month received from frontend are Jalali
     year = data.get('year')
     month = data.get('month')
-
-    if not year or not month:
-        logging.error(f"generate_excel: Year or month missing in request. Year: {year}, Month: {month}")
-        return jsonify({"status": "error", "error": "Year and month are required in JSON payload."}), 400
     
     schedules = load_schedules()
     # Use Jalali year/month for the key
     period_key = f"{year}-{month}"
     
     if period_key not in schedules:
-        logging.warning(f"generate_excel: No schedule data found for period {period_key}.")
-        response = jsonify({"status": "error", "error": f"No schedule data found for selected period {year}-{month} (Test: Sent as 200 OK)"})
-        response.status_code = 200 # DIAGNOSTIC: Send 200 OK instead of 404
-        return response
+        return jsonify({"error": "No schedule data found for selected period"}), 404
     
     # Generate Excel files for each workplace
     excel_files = []
-    generation_errors = []
     for workplace in WORKPLACES:
         # Use Jalali year/month in filename
         filename = f"{workplace.replace(' ', '_')}_{year}_{month}.xlsx"
         file_path = os.path.join(DATA_DIR, filename)
         
-        try:
-            # Create Excel with formatting using Jalali calendar info
-            create_excel_schedule(file_path, workplace, str(year), str(month), schedules[period_key].get(workplace, {}))
-            excel_files.append(filename)
-        except Exception as e:
-            logging.error(f"generate_excel: Error creating Excel for workplace {workplace}: {e}", exc_info=True)
-            generation_errors.append(f"Error for {workplace}: {str(e)}")
+        # Create Excel with formatting using Jalali calendar info
+        create_excel_schedule(file_path, workplace, year, month, schedules[period_key].get(workplace, {}))
+        excel_files.append(filename)
     
-    if generation_errors:
-        # If some files were generated but others had errors
-        if excel_files:
-            return jsonify({
-                "status": "partial_success",
-                "files": excel_files,
-                "errors": generation_errors
-            }), 207 # Multi-Status
-        else:
-            return jsonify({
-                "status": "error",
-                "error": "Failed to generate any Excel files.",
-                "details": generation_errors
-            }), 500
-
     return jsonify({
         "status": "success",
         "files": excel_files
@@ -1448,23 +1407,11 @@ def mark_admin_read_api(engineer_name):
 @app.route('/api/generate_overall_excel', methods=['POST'])
 @login_required
 def generate_overall_excel():
-    logging.info(f"generate_overall_excel: Request headers: {request.headers}")
-    logging.info(f"generate_overall_excel: Request raw data: {request.data}")
-    try:
-        data = request.get_json()
-        if data is None:
-            logging.error("generate_overall_excel: Failed to parse JSON data or data is empty.")
-            return jsonify({"status": "error", "error": "Invalid JSON payload or empty request body."}), 400
-    except Exception as e:
-        logging.error(f"generate_overall_excel: Error getting JSON data: {e}", exc_info=True)
-        return jsonify({"status": "error", "error": f"Error processing request data: {str(e)}"}), 400
-        
-    logging.info(f"generate_overall_excel: Parsed data: {data}")
+    data = request.json
     year = data.get('year')
     month = data.get('month')
 
     if not year or not month:
-        logging.error(f"generate_overall_excel: Year or month missing. Year: {year}, Month: {month}")
         return jsonify({"status": "error", "error": "Year and month are required."}), 400
 
     schedules = load_schedules()
@@ -1472,10 +1419,7 @@ def generate_overall_excel():
     schedule_data_for_period = schedules.get(period_key)
 
     if not schedule_data_for_period:
-        logging.warning(f"generate_overall_excel: No schedule data for period {period_key}")
-        response = jsonify({"status": "error", "error": f"No schedule data found for {year}-{month} (Test: Sent as 200 OK)"})
-        response.status_code = 200 # DIAGNOSTIC: Send 200 OK instead of 404
-        return response
+        return jsonify({"status": "error", "error": f"No schedule data found for {year}-{month}."}), 404
 
     # Use Jalali year/month in filename
     filename = f"Overall_Shifts_{year}_{month}.xlsx"
