@@ -43,6 +43,19 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log("DEBUG: Engineer name for listeners:", engineerName);
     const btnDownloadPdf = document.getElementById('btnDownloadPdf');
 
+    // Check if panel is locked (isPanelLockedForJS is global, passed from template)
+    if (typeof isPanelLockedForJS !== 'undefined' && isPanelLockedForJS) {
+        console.log("Engineer panel is LOCKED. Disabling controls.");
+        if (monthSelect) monthSelect.disabled = true;
+        if (yearSelect) yearSelect.disabled = true;
+        if (btnSaveLimitations) btnSaveLimitations.disabled = true;
+        if (btnDownloadPdf) btnDownloadPdf.disabled = true;
+        if (messageContent) messageContent.disabled = true;
+        if (btnSendMessage) btnSendMessage.disabled = true;
+        // Optionally, add a class to the calendar container to visually indicate it's locked
+        if (calendarContainer) calendarContainer.classList.add('disabled-calendar');
+    }
+
     // Initial calendar generation
     if (typeof generateLimitationsCalendar === 'function') {
         // --- NEW: Ensure engineerData.limitations is properly structured ---
@@ -252,17 +265,14 @@ function generateLimitationsCalendar() {
             checkbox.dataset.day = dayStr;
             checkbox.dataset.shift = shiftKey;
             
-            // Check against the specific month's limitations (monthLims)
-            const shiftsForDay = monthLims[dayStr] || []; // Get limitations for this specific day
-            const shouldBeChecked = Array.isArray(shiftsForDay) && shiftsForDay.includes(shiftKey);
-            // console.log(`DEBUG: Checking Day: ${dayStr}, Shift: ${shiftKey}. MonthLims[${dayStr}]: ${JSON.stringify(shiftsForDay)}, Includes: ${shiftsForDay.includes(shiftKey)}, Should Check: ${shouldBeChecked}`); // Verbose log
-
-            if (shouldBeChecked) {
-                 console.log(`---> DEBUG: CHECKING BOX for Day ${dayStr}, Shift ${shiftKey}`); // Log when checking
+            // Check if this shift is in limitations for the current day
+            if (monthLims[dayStr] && monthLims[dayStr].includes(shiftKey)) {
                 checkbox.checked = true;
-            } else {
-                 // Optional: Log when NOT checking
-                 // console.log(`---> DEBUG: NOT checking box for Day ${dayStr}, Shift ${shiftKey}`);
+            }
+
+            // Disable checkbox if panel is locked
+            if (typeof isPanelLockedForJS !== 'undefined' && isPanelLockedForJS) {
+                checkbox.disabled = true;
             }
             
             cell.appendChild(checkbox);

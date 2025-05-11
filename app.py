@@ -43,6 +43,10 @@ PERSIAN_DAY_NAMES = [
     "شنبه", "یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنجشنبه", "جمعه"
 ]
 
+# Global state for engineer panel lock
+ENGINEER_PANEL_LOCKED = False
+LOCK_MESSAGE = "پنل کاربری برای اعمال محدودیت‌های شما به دلیل عدم رعایت زمان‌بندی بسته شده است. لطفاً در زمان مشخص‌شده وارد شوید، در غیر این صورت با مدیر واحد تماس بگیرید"
+
 # Configuration
 DATA_DIR = 'data'
 if not os.path.exists(DATA_DIR):
@@ -1083,6 +1087,7 @@ def create_overall_excel_schedule(file_path, year, month, schedules_data):
 @app.route('/engineer/dashboard')
 @engineer_required # Protect this route
 def engineer_dashboard():
+    global ENGINEER_PANEL_LOCKED, LOCK_MESSAGE # Access global lock state
     # Get engineer's name from session
     engineer_name = session.get('user', {}).get('engineer_name')
     if not engineer_name:
@@ -1112,7 +1117,9 @@ def engineer_dashboard():
         current_jalali_year=current_jalali_year,
         current_jalali_month=current_jalali_month,
         persian_month_names=PERSIAN_MONTH_NAMES,
-        unread_message_count=unread_message_count # Pass unread count
+        unread_message_count=unread_message_count, # Pass unread count
+        is_panel_locked=ENGINEER_PANEL_LOCKED, # Pass lock status
+        lock_message=LOCK_MESSAGE if ENGINEER_PANEL_LOCKED else "" # Pass lock message
     )
 
 # --- API Endpoint for Engineer Saving Limitations ---
@@ -1433,6 +1440,23 @@ def generate_overall_excel():
         return jsonify({"status": "error", "error": f"Failed to generate overall Excel: {str(e)}"}), 500
 
 # --- END New API Route ---
+
+# --- Engineer Panel Lock Routes ---
+@app.route('/admin/toggle_engineer_lock', methods=['POST'])
+@admin_required
+def toggle_engineer_lock():
+    global ENGINEER_PANEL_LOCKED
+    ENGINEER_PANEL_LOCKED = not ENGINEER_PANEL_LOCKED
+    status_message = "قفل شد" if ENGINEER_PANEL_LOCKED else "باز شد"
+    flash(f"دسترسی مهندسان برای ثبت محدودیت {status_message}.", "success" if not ENGINEER_PANEL_LOCKED else "warning")
+    return jsonify({"status": "success", "locked": ENGINEER_PANEL_LOCKED, "message": f"Engineer panel is now {'locked' if ENGINEER_PANEL_LOCKED else 'unlocked'}."})
+
+@app.route('/api/engineer_lock_status', methods=['GET'])
+@login_required # Should be accessible by engineers too
+def get_engineer_lock_status():
+    global ENGINEER_PANEL_LOCKED, LOCK_MESSAGE
+    return jsonify({"locked": ENGINEER_PANEL_LOCKED, "lock_message": LOCK_MESSAGE if ENGINEER_PANEL_LOCKED else ""})
+# --- End Engineer Panel Lock Routes ---
 
 if __name__ == '__main__':
     app.run(debug=True, port=8000)

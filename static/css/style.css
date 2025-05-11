@@ -400,3 +400,10 @@ select.form-select.cross-workplace-conflict-warning {
 
 /* Ensure other styles don't conflict */
 /* ... */
+
+.disabled-calendar {
+    opacity: 0.6;
+    pointer-events: none; /* Prevent interactions with elements inside */
+}
+
+/* Styles for the sticky header on the schedule table */

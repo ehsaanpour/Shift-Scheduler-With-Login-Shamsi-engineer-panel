@@ -39,6 +39,12 @@
         {% endif %}
     {% endwith %}
 
+    {% if is_panel_locked %}
+    <div class="alert alert-danger text-center" role="alert">
+        <i class="fas fa-lock me-2"></i> <strong>{{ lock_message }}</strong>
+    </div>
+    {% endif %}
+
     <div class="row">
         <div class="col-lg-8">
             <div class="card shadow-sm mb-4">
@@ -145,6 +151,7 @@
     // Pass numbers directly
     const initialJalaliYear = {{ current_jalali_year }};
     const initialJalaliMonth = {{ current_jalali_month }};
+    const isPanelLockedForJS = {{ is_panel_locked|tojson|safe }};
 </script>
 <script src="{{ url_for('static', filename='js/engineer_limitations.js') }}"></script>
 {% endblock %} 
