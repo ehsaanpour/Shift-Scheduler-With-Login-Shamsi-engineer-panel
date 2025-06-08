@@ -1542,11 +1542,19 @@ async function generateShiftReport() {
                 <tbody>
         `;
 
-        for (const engineerName in reportData) {
-            const data = reportData[engineerName];
+        // Convert reportData object to an array for sorting
+        const sortedEngineersReport = Object.keys(reportData).map(engineerName => ({
+            name: engineerName,
+            ...reportData[engineerName]
+        }));
+
+        // Sort engineers by totalShifts in descending order
+        sortedEngineersReport.sort((a, b) => b.totalShifts - a.totalShifts);
+
+        sortedEngineersReport.forEach(data => {
             tableHtml += `
                 <tr>
-                    <td>${engineerName}</td>
+                    <td>${data.name}</td>
                     <td>${data.totalShifts}</td>
                     <td>${data.shift1Count}</td>
                     <td>${data.shift2Count}</td>
@@ -1555,7 +1563,7 @@ async function generateShiftReport() {
                     <td>${data.nodalShifts}</td>
                 </tr>
             `;
-        }
+        });
 
         tableHtml += `
                 </tbody>
