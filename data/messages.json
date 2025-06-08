@@ -33,7 +33,7 @@
     "timestamp": "2025-05-04T06:10:53.275454+00:00",
     "content": "محدودیت اردیبهشت",
     "read_by_engineer": true,
-    "read_by_admin": false
+    "read_by_admin": true
   },
   {
     "message_id": "6137a520-fb35-4d95-b34e-daaa00d5bc7c",
@@ -42,7 +42,7 @@
     "timestamp": "2025-05-04T06:12:25.724595+00:00",
     "content": "محدودیت تا بیستم خرداد",
     "read_by_engineer": true,
-    "read_by_admin": false
+    "read_by_admin": true
   },
   {
     "message_id": "6b9e56ec-fa13-4baa-8115-9ced479120ee",
@@ -86,6 +86,150 @@
     "sender_role": "admin",
     "timestamp": "2025-05-10T02:25:56.096238+00:00",
     "content": "۲۵ ام که پنج شنبه است",
+    "read_by_engineer": true,
+    "read_by_admin": true
+  },
+  {
+    "message_id": "c8da6dca-b86b-4cae-82ef-722faa478c79",
+    "engineer_name": "هاشمی",
+    "sender_role": "engineer",
+    "timestamp": "2025-05-28T10:24:44.290747+00:00",
+    "content": "لطفا شیفتهای شب منو بیشتر کنید ممنون ازهمکاریتون",
+    "read_by_engineer": true,
+    "read_by_admin": true
+  },
+  {
+    "message_id": "7afd383d-5317-4ac3-ab76-f5e2a792ae27",
+    "engineer_name": "هاشمی",
+    "sender_role": "engineer",
+    "timestamp": "2025-05-28T10:30:53.875588+00:00",
+    "content": "لطفا شیفنهای شب منو بیشتر باشه ممنون",
+    "read_by_engineer": true,
+    "read_by_admin": true
+  },
+  {
+    "message_id": "5047d129-fd15-412f-b1e9-287ba5fea501",
+    "engineer_name": "نصیری",
+    "sender_role": "engineer",
+    "timestamp": "2025-05-28T15:41:12.297761+00:00",
+    "content": "سلام من شیفتهایی که میتونم بیام تیک میزنم",
+    "read_by_engineer": true,
+    "read_by_admin": true
+  },
+  {
+    "message_id": "2faa427b-c024-4850-b535-1d2abfd97a0a",
+    "engineer_name": "نصیری",
+    "sender_role": "engineer",
+    "timestamp": "2025-05-28T15:44:49.478629+00:00",
+    "content": "سلام شیفتهایی که میتونم بیام تیک زدم ممنون",
+    "read_by_engineer": true,
+    "read_by_admin": true
+  },
+  {
+    "message_id": "a34379a1-1cf2-4424-9f12-c5e8badeaa64",
+    "engineer_name": "شریفی",
+    "sender_role": "engineer",
+    "timestamp": "2025-05-30T20:12:55.311841+00:00",
+    "content": "سلام\nترجیحا شیفت دو و سه  نودال باشم",
+    "read_by_engineer": true,
+    "read_by_admin": true
+  },
+  {
+    "message_id": "e8c2aa42-3205-46f0-99d2-75302f975ec4",
+    "engineer_name": "شریفی",
+    "sender_role": "engineer",
+    "timestamp": "2025-05-30T20:14:11.016567+00:00",
+    "content": "لطفا شیف 2 و 3 نودال باشم",
+    "read_by_engineer": true,
+    "read_by_admin": true
+  },
+  {
+    "message_id": "2f091a7d-e669-4bd8-8b8a-47c257d0c819",
+    "engineer_name": "نظربیگی",
+    "sender_role": "engineer",
+    "timestamp": "2025-06-01T07:44:46.066555+00:00",
+    "content": "سلام وقت بخیر و خسته نباشید\nاگر امکانش باشه یکشنبه ها  دو شیفت ثابت بشه برای من خوب هستش.  این دوماه هم یکشنبه ها اکثرا اومدم و شیفت یک پرس یا دو هیسپان بودم یا هر دو بودم",
+    "read_by_engineer": true,
+    "read_by_admin": true
+  },
+  {
+    "message_id": "b2a5ee2f-e892-4f02-be16-80b492e7f8e5",
+    "engineer_name": "نظربیگی",
+    "sender_role": "engineer",
+    "timestamp": "2025-06-03T07:27:59.801792+00:00",
+    "content": "سلام وقت بخیر، اگر بشه یکشنبه ها شیفت یک پرس و دو هیسپان رو برای من بگذارید خوب هستش\nو حتی الامکان برام نودال نگذارید چون نودال خیلی استرس میگیرم و استودیو ها تمرکزم بیشتر هست\nتشکر",
+    "read_by_engineer": true,
+    "read_by_admin": true
+  },
+  {
+    "message_id": "01e23af6-a4e0-4ac2-8317-4353f6df596a",
+    "engineer_name": "نظربیگی",
+    "sender_role": "engineer",
+    "timestamp": "2025-06-03T07:29:16.901263+00:00",
+    "content": "سلام وقت بخیر، اگر بشه یکشنبه ها شیفت یک پرس و دو هیسپان رو برای من بگذارید خوب هستش\nو حتی الامکان برام نودال نگذارید چون نودال خیلی استرس میگیرم و استودیو ها تمرکزم بیشتر هست\nتشکر",
+    "read_by_engineer": true,
+    "read_by_admin": true
+  },
+  {
+    "message_id": "20ba42a3-e3bf-45dc-8526-766c0a6ae527",
+    "engineer_name": "شرفی",
+    "sender_role": "engineer",
+    "timestamp": "2025-06-05T12:45:25.599913+00:00",
+    "content": "سلام و وقت بخیر خدمت مهندس عزیز، مهندس جان اگر امکان داشت شیفت‌های شب که برای من در نظر داری کمترین مقدار ممکن باشه، همچنین اگر لطف کنید معمولا دو تا یا بیشتر شیفت من را پشت سر هم قرار بدهید بهتر از این هست که تک شیفت در روز باشه",
+    "read_by_engineer": true,
+    "read_by_admin": true
+  },
+  {
+    "message_id": "b0ce3941-d30e-4f04-8596-2fae66a27d53",
+    "engineer_name": "شرفی",
+    "sender_role": "engineer",
+    "timestamp": "2025-06-05T12:50:43.362151+00:00",
+    "content": "سلام و وقت بخیر خدمت مهندس عزیز، مهندس جان اگر امکان داشت شیفت‌های شب که برای من در نظر داری کمترین مقدار ممکن باشه، همچنین اگر لطف کنید معمولا دو تا یا بیشتر شیفت من را پشت سر هم قرار بدهید بهتر از این هست که تک شیفت در روز باشه. ممنون🙌😍",
+    "read_by_engineer": true,
+    "read_by_admin": true
+  },
+  {
+    "message_id": "2e3a673d-d49c-49b3-9a29-be487690cf9a",
+    "engineer_name": "شرفی",
+    "sender_role": "admin",
+    "timestamp": "2025-06-06T10:04:54.498672+00:00",
+    "content": "سلام\nالان بچه هایی هستند که حدود 12 شیفت شب میان\nمن شما رو در کمترین حالتی می نویسم که به بقیه فشار نیاید",
+    "read_by_engineer": false,
+    "read_by_admin": true
+  },
+  {
+    "message_id": "664e2f30-ea73-4353-a2d9-0defc9c9ec97",
+    "engineer_name": "شریفی",
+    "sender_role": "admin",
+    "timestamp": "2025-06-06T10:05:33.495783+00:00",
+    "content": "سلام\nشما ترجیح اصلی شیفت 2 هست برای نودال یا شیفت 3؟",
+    "read_by_engineer": false,
+    "read_by_admin": true
+  },
+  {
+    "message_id": "59f0220d-c609-4bcb-b180-aa9e9611cef5",
+    "engineer_name": "هاشمی",
+    "sender_role": "admin",
+    "timestamp": "2025-06-06T10:05:54.337797+00:00",
+    "content": "بله اگه امکان پذیر باشه",
+    "read_by_engineer": false,
+    "read_by_admin": true
+  },
+  {
+    "message_id": "2d0fa42e-df1a-406c-8c84-564cd099f09e",
+    "engineer_name": "نوبخت",
+    "sender_role": "admin",
+    "timestamp": "2025-06-06T10:06:04.169396+00:00",
+    "content": "عالی",
+    "read_by_engineer": false,
+    "read_by_admin": true
+  },
+  {
+    "message_id": "6fb80bad-4e5a-454c-911c-15148ae9fbfc",
+    "engineer_name": "نصیری",
+    "sender_role": "admin",
+    "timestamp": "2025-06-06T10:06:39.629720+00:00",
+    "content": "چرا که نه",
     "read_by_engineer": false,
     "read_by_admin": true
   }
