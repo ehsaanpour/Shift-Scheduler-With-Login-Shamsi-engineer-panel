@@ -166,6 +166,12 @@ function setupEventListeners() {
         generateReportBtn.addEventListener('click', generateShiftReport);
     }
 
+    // New: Event listener for Generate Two-Month Report button
+    const generateTwoMonthReportBtn = document.getElementById('btnGenerateTwoMonthReport');
+    if (generateTwoMonthReportBtn) {
+        generateTwoMonthReportBtn.addEventListener('click', generateTwoMonthShiftReport);
+    }
+
     // New: Event listener for Confirm Clear Range button in modal
     const confirmClearRangeBtn = document.getElementById('btnConfirmClearRange');
     if (confirmClearRangeBtn) {
@@ -1460,7 +1466,9 @@ function applyPattern() {
 async function generateShiftReport() {
     const reportModal = new bootstrap.Modal(document.getElementById('reportModal'));
     const reportTableContainer = document.getElementById('reportTableContainer');
+    const reportTitle = document.getElementById('reportTitle');
     reportTableContainer.innerHTML = '<p class="text-center">درحال تولید گزارش...</p>'; // Show loading message
+    reportTitle.textContent = 'گزارش شیفت مهندسان';
     reportModal.show();
 
     const year = parseInt(document.getElementById('yearSelect').value);
@@ -1681,6 +1689,155 @@ async function confirmClearRangeShifts() {
         showAlert(`خطا در پاک کردن بازه‌ای شیفت‌ها: ${error.message}`, 'danger');
         // Optionally, provide more specific feedback in the modal validation area
         validationFeedback.textContent = `خطا در ارتباط با سرور: ${error.message}`;
+    }
+}
+
+// New: Function to generate and display the two-month shift report
+async function generateTwoMonthShiftReport() {
+    const reportModal = new bootstrap.Modal(document.getElementById('reportModal'));
+    const reportTableContainer = document.getElementById('reportTableContainer');
+    const reportTitle = document.getElementById('reportTitle');
+    reportTableContainer.innerHTML = '<p class="text-center">درحال تولید گزارش...</p>'; // Show loading message
+    reportTitle.textContent = 'گزارش دو ماهه شیفت مهندسان';
+    reportModal.show();
+
+    const year = parseInt(document.getElementById('yearSelect').value);
+    const month = parseInt(document.getElementById('monthSelect').value);
+
+    // Calculate next month
+    let nextMonth = month + 1;
+    let nextYear = year;
+    if (nextMonth > 12) {
+        nextMonth = 1;
+        nextYear++;
+    }
+
+    if (!window.engineers || window.engineers.length === 0) {
+        reportTableContainer.innerHTML = '<p class="text-center text-danger">لیست مهندسان بارگذاری نشده است. لطفا صفحه را رفرش کنید.</p>';
+        return;
+    }
+
+    try {
+        // Fetch data for both months
+        const [currentMonthResponse, nextMonthResponse] = await Promise.all([
+            fetch(`/api/schedule?year=${year}&month=${month}`),
+            fetch(`/api/schedule?year=${nextYear}&month=${nextMonth}`)
+        ]);
+
+        if (!currentMonthResponse.ok || !nextMonthResponse.ok) {
+            throw new Error('Failed to fetch schedule data');
+        }
+
+        const currentMonthData = await currentMonthResponse.json();
+        const nextMonthData = await nextMonthResponse.json();
+
+        const reportData = {};
+
+        // Initialize reportData for all engineers
+        window.engineers.forEach(eng => {
+            reportData[eng.name] = {
+                totalShifts: 0,
+                shift1Count: 0,
+                shift2Count: 0,
+                shift3Count: 0,
+                thursdayFridayShifts: 0,
+                nodalShifts: 0
+            };
+        });
+
+        // Process both months' schedules
+        const processSchedule = (schedule, year, month) => {
+            for (const workplace in schedule) {
+                for (const dayStr in schedule[workplace]) {
+                    const day = parseInt(dayStr);
+                    for (const shiftType in schedule[workplace][dayStr]) {
+                        const engineerName = schedule[workplace][dayStr][shiftType];
+                        if (engineerName && reportData[engineerName]) {
+                            reportData[engineerName].totalShifts++;
+
+                            if (shiftType === 'shift1') reportData[engineerName].shift1Count++;
+                            else if (shiftType === 'shift2') reportData[engineerName].shift2Count++;
+                            else if (shiftType === 'shift3') reportData[engineerName].shift3Count++;
+
+                            if (workplace.toLowerCase().includes('nodal')) {
+                                reportData[engineerName].nodalShifts++;
+                            }
+
+                            // Determine day of the week
+                            const gregorianDate = jalaali.toGregorian(year, month, day);
+                            const dateObj = new Date(gregorianDate.gy, gregorianDate.gm - 1, gregorianDate.gd);
+                            const dayOfWeek = dateObj.getDay();
+
+                            if (dayOfWeek === 4 || dayOfWeek === 5) {
+                                reportData[engineerName].thursdayFridayShifts++;
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        processSchedule(currentMonthData || {}, year, month);
+        processSchedule(nextMonthData || {}, nextYear, nextMonth);
+
+        // Generate HTML table
+        let tableHtml = `
+            <table class="table table-bordered table-striped table-sm">
+                <thead class="table-light">
+                    <tr>
+                        <th>نام مهندس</th>
+                        <th>کل شیفت‌ها</th>
+                        <th>شیفت ۱</th>
+                        <th>شیفت ۲</th>
+                        <th>شیفت ۳</th>
+                        <th>شیفت‌های پنج‌شنبه و جمعه</th>
+                        <th>شیفت‌های نودال</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        // Convert reportData object to an array for sorting
+        const sortedEngineersReport = Object.keys(reportData).map(engineerName => ({
+            name: engineerName,
+            ...reportData[engineerName]
+        }));
+
+        // Sort engineers by totalShifts in descending order
+        sortedEngineersReport.sort((a, b) => b.totalShifts - a.totalShifts);
+
+        sortedEngineersReport.forEach(data => {
+            tableHtml += `
+                <tr>
+                    <td>${data.name}</td>
+                    <td>${data.totalShifts}</td>
+                    <td>${data.shift1Count}</td>
+                    <td>${data.shift2Count}</td>
+                    <td>${data.shift3Count}</td>
+                    <td>${data.thursdayFridayShifts}</td>
+                    <td>${data.nodalShifts}</td>
+                </tr>
+            `;
+        });
+
+        tableHtml += `
+                </tbody>
+            </table>
+        `;
+
+        // Add period information
+        const periodInfo = `
+            <div class="alert alert-info mb-3">
+                <i class="fas fa-info-circle me-2"></i>
+                گزارش دو ماهه: ${PERSIAN_MONTH_NAMES[month]} ${year} و ${PERSIAN_MONTH_NAMES[nextMonth]} ${nextYear}
+            </div>
+        `;
+
+        reportTableContainer.innerHTML = periodInfo + tableHtml;
+
+    } catch (error) {
+        console.error('Error generating two-month report:', error);
+        reportTableContainer.innerHTML = `<p class="text-center text-danger">خطا در تولید گزارش: ${error.message}</p>`;
     }
 }
 
