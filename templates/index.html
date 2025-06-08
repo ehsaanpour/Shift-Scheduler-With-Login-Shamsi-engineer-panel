@@ -1870,6 +1870,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Collect all current assignments from the DOM
         const assignments = {}; // Structure: assignments[day][shift][engineer] = workplace
+        const shiftCounts = {}; // Structure: shiftCounts[engineer] = {shift1: 0, shift2: 0, shift3: 0}
+
+        // Initialize shift counts for all engineers
+        engineers.forEach(eng => {
+            shiftCounts[eng.name] = {shift1: 0, shift2: 0, shift3: 0};
+        });
+
         document.querySelectorAll('.engineer-select').forEach(select => {
             if (select.value) {
                 const day = select.dataset.day;
@@ -1880,6 +1887,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (!assignments[day]) assignments[day] = {};
                 if (!assignments[day][shift]) assignments[day][shift] = {};
                 assignments[day][shift][engineer] = workplace;
+
+                // Increment shift count for this engineer
+                if (shiftCounts[engineer]) {
+                    shiftCounts[engineer][shift]++;
+                }
             }
         });
 
@@ -1889,7 +1901,6 @@ document.addEventListener('DOMContentLoaded', function() {
             "Studio Hispan": "#82f3cc",
             "Nodal": "#ffc97d",
             "Engineer Room": "#c0c6f4"
-            // Add other workplaces and their colors if needed
         };
         const defaultCellColor = "#ffffff"; // White for unassigned
 
@@ -1939,18 +1950,18 @@ document.addEventListener('DOMContentLoaded', function() {
                         border: 1px solid #ccc; 
                         padding: 4px 6px;
                         text-align: center; 
-                        min-width: 50px; /* Adjust min-width if needed */
+                        min-width: 50px;
                         white-space: nowrap; 
-                        vertical-align: middle; /* Center content vertically */
-                        height: 30px; /* Fixed height for cells */
+                        vertical-align: middle;
+                        height: 30px;
                     }
                     th { background-color: #f0f0f0; font-weight: bold; }
                     .day-label { font-weight: bold; font-size: 0.9em; } 
-                    .day-name-small { font-size: 0.8em; color: #555; } 
-                    /* Legend Styles */
+                    .day-name-small { font-size: 0.8em; color: #555; }
+                    .shift-count { font-size: 0.8em; color: #666; }
                     .legend { margin-top: 20px; padding: 10px; border-top: 1px solid #ccc; text-align: right; font-size: 0.9em; }
-                    .legend-item { display: inline-block; margin-left: 15px; /* RTL margin */ margin-right: 0; }
-                    .legend-color-box { display: inline-block; width: 15px; height: 15px; border: 1px solid #666; vertical-align: middle; margin-left: 5px; /* RTL margin */ margin-right: 0; }
+                    .legend-item { display: inline-block; margin-left: 15px; margin-right: 0; }
+                    .legend-color-box { display: inline-block; width: 15px; height: 15px; border: 1px solid #666; vertical-align: middle; margin-left: 5px; margin-right: 0; }
                 </style>
             </head>
             <body>
@@ -1959,15 +1970,16 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
 
         engineers.forEach(engineer => {
+            const counts = shiftCounts[engineer.name];
             popupHTML += `<div class="engineer-column"><h4>${engineer.name}</h4>`;
             popupHTML += `
                 <table>
                     <thead>
                         <tr>
                             <th>روز</th>
-                            <th>شیفت ۱</th>
-                            <th>شیفت ۲</th>
-                            <th>شیفت ۳</th>
+                            <th>شیفت ۱<br><span class="shift-count">(${toPersianDigits(counts.shift1)})</span></th>
+                            <th>شیفت ۲<br><span class="shift-count">(${toPersianDigits(counts.shift2)})</span></th>
+                            <th>شیفت ۳<br><span class="shift-count">(${toPersianDigits(counts.shift3)})</span></th>
                         </tr>
                     </thead>
                     <tbody>
