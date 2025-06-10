@@ -1,3 +1,13 @@
 {
-    "args": [ "python3 app.py" ]
-}
+    "args": [ "python3 app.py" ],
+    "port": 3000,
+    "build": {
+      "location": "iran"
+    },
+    "disks": [
+      {
+        "name": "data",
+        "mountTo": "/app/data"
+      }
+    ]
+  }
