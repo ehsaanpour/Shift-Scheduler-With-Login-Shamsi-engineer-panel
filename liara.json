@@ -7,7 +7,7 @@
     },
     "disks": [
       {
-        "name": "data",
+        "name": "data1",
         "mountTo": "/data"
         
       }
