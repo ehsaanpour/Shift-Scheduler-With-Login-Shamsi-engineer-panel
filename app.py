@@ -56,7 +56,7 @@ ENGINEER_PANEL_LOCKED = False
 LOCK_MESSAGE = "پنل کاربری برای اعمال محدودیت‌های شما به دلیل عدم رعایت زمان‌بندی بسته شده است. لطفاً در زمان مشخص‌شده وارد شوید، در غیر این صورت با مدیر واحد تماس بگیرید"
 
 # Configuration
-DATA_DIR = os.environ.get('DATA_DIR', 'data')
+DATA_DIR = '/data'  # Use absolute path as specified in liara.json
 logger.info(f"Using DATA_DIR: {DATA_DIR}")
 if not os.path.exists(DATA_DIR):
     logger.info(f"Creating DATA_DIR: {DATA_DIR}")
@@ -69,7 +69,7 @@ USERS_FILE = os.path.join(DATA_DIR, 'users.json')
 NOTIFICATIONS_FILE = os.path.join(DATA_DIR, 'notifications.json')
 MESSAGES_FILE = os.path.join(DATA_DIR, 'messages.json')
 
-# Log file permissions
+# Log file permissions and existence
 for file_path in [ENGINEERS_FILE, SCHEDULES_FILE, USERS_FILE, NOTIFICATIONS_FILE, MESSAGES_FILE]:
     if os.path.exists(file_path):
         logger.info(f"File {file_path} exists with permissions: {oct(os.stat(file_path).st_mode)[-3:]}")
