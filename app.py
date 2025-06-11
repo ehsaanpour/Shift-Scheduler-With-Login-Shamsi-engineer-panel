@@ -48,7 +48,7 @@ ENGINEER_PANEL_LOCKED = False
 LOCK_MESSAGE = "پنل کاربری برای اعمال محدودیت‌های شما به دلیل عدم رعایت زمان‌بندی بسته شده است. لطفاً در زمان مشخص‌شده وارد شوید، در غیر این صورت با مدیر واحد تماس بگیرید"
 
 # Configuration
-DATA_DIR = '/data'
+DATA_DIR = 'data'
 if not os.path.exists(DATA_DIR):
     os.makedirs(DATA_DIR)
 
