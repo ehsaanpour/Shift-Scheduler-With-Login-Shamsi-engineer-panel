@@ -8,10 +8,10 @@
     "disks": [
       {
         "name": "data",
-        "mountTo": "/app/data"
+        "mountTo": "/data"
       }
     ],
     "env": {
-      "DATA_DIR": "/app/data"
+      "DATA_DIR": "/data"
     }
 }
