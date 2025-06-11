@@ -11,8 +11,5 @@
         "mountTo": "/app/data"
         
       }
-    ],
-    "env": {
-      "DATA_DIR": "/app/data"
-    }
-}
+    ]
+  }
