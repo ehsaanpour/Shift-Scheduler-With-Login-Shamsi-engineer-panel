@@ -1,7 +1,7 @@
 {
     "app": "shifts",
     "args": [ "python3 app.py" ],
-    "port": 8000,
+    "port": 3000,
     "build": {
       "location": "iran"
     },
