@@ -24,7 +24,15 @@ app.secret_key = '940e26b1bfcbe2c0111ce0aaf3230d43' # Set a persistent secret ke
 # app.secret_key = secrets.token_hex(16)  # Commented out random generation
 
 # Set up logging
-logging.basicConfig(level=logging.INFO) # Add basic logging configuration
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler('app.log')
+    ]
+)
+logger = logging.getLogger(__name__)
 
 # Set jdatetime locale to Persian
 try:
@@ -48,15 +56,26 @@ ENGINEER_PANEL_LOCKED = False
 LOCK_MESSAGE = "پنل کاربری برای اعمال محدودیت‌های شما به دلیل عدم رعایت زمان‌بندی بسته شده است. لطفاً در زمان مشخص‌شده وارد شوید، در غیر این صورت با مدیر واحد تماس بگیرید"
 
 # Configuration
-DATA_DIR = 'data'
+DATA_DIR = '/data'  # Use absolute path as specified in liara.json
+logger.info(f"Using DATA_DIR: {DATA_DIR}")
 if not os.path.exists(DATA_DIR):
+    logger.info(f"Creating DATA_DIR: {DATA_DIR}")
     os.makedirs(DATA_DIR)
+    logger.info(f"Created DATA_DIR with permissions: {oct(os.stat(DATA_DIR).st_mode)[-3:]}")
 
 ENGINEERS_FILE = os.path.join(DATA_DIR, 'engineers.json')
 SCHEDULES_FILE = os.path.join(DATA_DIR, 'schedules.json')
 USERS_FILE = os.path.join(DATA_DIR, 'users.json')
-NOTIFICATIONS_FILE = os.path.join(DATA_DIR, 'notifications.json') # New notifications file
-MESSAGES_FILE = os.path.join(DATA_DIR, 'messages.json') # New messages file
+NOTIFICATIONS_FILE = os.path.join(DATA_DIR, 'notifications.json')
+MESSAGES_FILE = os.path.join(DATA_DIR, 'messages.json')
+
+# Log file permissions and existence
+for file_path in [ENGINEERS_FILE, SCHEDULES_FILE, USERS_FILE, NOTIFICATIONS_FILE, MESSAGES_FILE]:
+    if os.path.exists(file_path):
+        logger.info(f"File {file_path} exists with permissions: {oct(os.stat(file_path).st_mode)[-3:]}")
+    else:
+        logger.info(f"File {file_path} does not exist")
+
 WORKPLACES = ["Studio Hispan", "Studio Press", "Nodal", "Engineer Room"]
 SHIFTS = ["Shift 1", "Shift 2", "Shift 3"]
 
@@ -239,57 +258,53 @@ def load_engineers():
 def save_engineers(engineers):
     lock_file_path = ENGINEERS_FILE + '.lock'
     try:
-        # Basic file locking mechanism (consider a more robust library like filelock for production)
+        logger.info(f"Attempting to save engineers to {ENGINEERS_FILE}")
+        logger.info(f"Current user: {os.getuid()}")
+        logger.info(f"Current directory: {os.getcwd()}")
+        
+        # Basic file locking mechanism
         with open(lock_file_path, 'w') as lock_file:
-            # Optional: Add locking logic here if using a library
-            print(f"SAVE_ENGINEERS: Acquired lock {lock_file_path}")
+            logger.info(f"Acquired lock {lock_file_path}")
             
             if not isinstance(engineers, list):
-                print(f"SAVE_ENGINEERS ERROR: Engineers is not a list, it's a {type(engineers)}")
+                logger.error(f"Engineers is not a list, it's a {type(engineers)}")
                 return
 
             if len(engineers) == 0:
-                print("SAVE_ENGINEERS WARNING: Saving an empty engineers list!")
+                logger.warning("Saving an empty engineers list!")
                 
             # Create backup of current file if it exists
             backup_file = f"{ENGINEERS_FILE}.bak"
             if os.path.exists(ENGINEERS_FILE):
+                logger.info(f"Creating backup at {backup_file}")
                 shutil.copy2(ENGINEERS_FILE, backup_file)
-                print(f"SAVE_ENGINEERS: Created backup at {backup_file}")
                 
-            print(f"SAVE_ENGINEERS: Preparing to save {len(engineers)} engineers to file")
-            # print(f"SAVE_ENGINEERS: Engineer names: {[eng.get('name', 'UNNAMED') for eng in engineers]}") # Can be verbose
+            logger.info(f"Preparing to save {len(engineers)} engineers to file")
             
             # Write to a temporary file first
             temp_file_path = ENGINEERS_FILE + '.tmp'
-            with open(temp_file_path, 'w', encoding='utf-8') as f:
-                json.dump(engineers, f, indent=2, ensure_ascii=False)
-                f.flush()  # Ensure buffer is written to OS
-                os.fsync(f.fileno()) # Force write to disk
-                print(f"SAVE_ENGINEERS: Data flushed and synced to temporary file {temp_file_path}")
-            
-            # Atomically replace the original file with the temporary file
-            os.replace(temp_file_path, ENGINEERS_FILE)
-            print(f"SAVE_ENGINEERS: Successfully saved {len(engineers)} by replacing {ENGINEERS_FILE} with {temp_file_path}")
-
+            try:
+                with open(temp_file_path, 'w', encoding='utf-8') as f:
+                    json.dump(engineers, f, indent=2, ensure_ascii=False)
+                    f.flush()
+                    os.fsync(f.fileno())
+                    logger.info(f"Data flushed and synced to temporary file {temp_file_path}")
+                
+                # Atomically replace the original file with the temporary file
+                os.replace(temp_file_path, ENGINEERS_FILE)
+                logger.info(f"Successfully saved {len(engineers)} engineers by replacing {ENGINEERS_FILE} with {temp_file_path}")
+            except Exception as e:
+                logger.error(f"Error during file operations: {str(e)}")
+                if os.path.exists(temp_file_path):
+                    os.remove(temp_file_path)
+                raise
     except Exception as e:
-        print(f"SAVE_ENGINEERS ERROR: {str(e)}")
-        # Attempt to restore from backup if available
-        backup_file = f"{ENGINEERS_FILE}.bak"
-        if os.path.exists(backup_file):
-            print(f"SAVE_ENGINEERS: Restoring from backup {backup_file}")
-            try:
-                shutil.copy2(backup_file, ENGINEERS_FILE)
-            except Exception as restore_e:
-                print(f"SAVE_ENGINEERS ERROR: Failed to restore backup: {restore_e}")
+        logger.error(f"Error in save_engineers: {str(e)}")
+        raise
     finally:
-        # Clean up lock file
         if os.path.exists(lock_file_path):
-            try:
-                os.remove(lock_file_path)
-                print(f"SAVE_ENGINEERS: Released lock {lock_file_path}")
-            except Exception as remove_e:
-                 print(f"SAVE_ENGINEERS ERROR: Failed to remove lock file {lock_file_path}: {remove_e}")
+            os.remove(lock_file_path)
+            logger.info(f"Released lock {lock_file_path}")
 
 def load_schedules():
     try:

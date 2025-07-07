@@ -1,4 +1,5 @@
 {
+    "app": "shifts",
     "args": [ "python3 app.py" ],
     "port": 3000,
     "build": {
@@ -7,7 +8,10 @@
     "disks": [
       {
         "name": "data",
-        "mountTo": "/app/data"
+        "mountTo": "/data"
       }
-    ]
-  }
+    ],
+    "env": {
+      "DATA_DIR": "/data"
+    }
+}
